@@ -1,0 +1,914 @@
+#include "stdafx.h"
+#include "drawline.h"
+#include <iostream>
+#include <iomanip>
+#include <stdlib.h>
+#include <cmath>
+#include <gl/glut.h>
+#include <ctime>
+#include <Windows.h>
+#include <string>
+#include <cstdio>
+#include <fstream>
+#define  MAX_NUM_TRIANGLE 100
+#define  MAX_NUM_SQUARE 100
+#define  MAX_NUM_OBJECT 10
+#define  MAX_ASC_MODEL_VERTEX 1980	//Adjust following by teapot.asc
+#define  MAX_ASC_MODEL_FACE   3760	//Adjust following by teapot.asc
+
+const int X_AXIS = 0,
+		  Y_AXIS = 1,
+		  Z_AXIS = 2;
+
+
+const bool SQUARE = true,
+		   TRIANGLE = false;
+const int RED = 0,
+		  BLUE = 1,
+		  WHITE = 2;
+using namespace std;
+
+struct ASCModel 
+{
+    int   num_vertex;
+    int   num_face;
+    float vertex[MAX_ASC_MODEL_VERTEX][3]; 
+    int   face[MAX_ASC_MODEL_FACE][5];
+};
+
+struct vec4
+{
+	float data[4];
+	vec4(){ data[0] = data[1] = data[2] = data[3] = 0; };
+	// vec4(float x, float y, float z, float w) TODO:need to fix the overload problem
+	vec4(float x, float y, float z, float w=1)
+	{
+		data[0] = x;
+		data[1] = y;
+		data[2] = z;
+		data[3] = w;
+	}
+	vec4(const vec4& a)
+	{
+		for (int i = 0; i<4; i++)
+			data[i] = a.data[i];
+		// cout << "point_data_copy_constructor" <<endl;
+	}
+	float length()
+	{
+		return sqrt(pow(data[0], 2) + pow(data[1], 2) + pow(data[2], 2));
+	}
+};
+
+struct matrix
+{
+	float data[4][4];
+	//Constructor
+	matrix(){
+		for (int i = 0; i<4; i++)
+			for (int j = 0; j<4; j++)
+				data[i][j] = 0;
+	}
+	//Copy constructor
+	matrix(const matrix& a)
+	{
+		for (int i = 0; i<4; i++)
+			for (int j = 0; j<4; j++)
+				data[i][j] = a.data[i][j];
+	}
+	matrix(const vec4& v1, const vec4& v2, const vec4& v3, const vec4& v4)
+	{
+		for(int i=0; i<4; i++)
+		{
+			data[0][i] = v1.data[i];
+			data[1][i] = v2.data[i];
+			data[2][i] = v3.data[i];
+			data[3][i] = v4.data[i];
+		}
+	}
+};
+
+
+
+struct point_data
+{
+	float x, y, z;
+	point_data* next;
+	point_data(){ next = NULL; }
+	point_data(float x_, float y_){ x = x_; y = y_; next = NULL; }
+	point_data(const point_data& n){ x = n.x; y = n.y; next = NULL; /*cout << "point_data_copy_constructor" <<endl;*/ }
+	point_data(vec4 a){ x = a.data[0]; y = a.data[1]; z = a.data[2]; next = NULL; }
+};
+
+
+//functions declaration
+void displayFunc(void);
+void ReadInput(bool& IsExit);
+
+void scale(float sx, float sy, float sz);
+void rotate(float degreeX, float degreeY, float degreeZ);
+void translate(float tx, float ty, float tz);
+void reset();
+void square();
+void triangle();
+void view(float wxl, float wxr, float wyb, float wyt, float vxl, float vxr, float vyb, float vyt);
+void clearData();
+void clearScreen();
+void observer(float px, float py, float pz, float cx, float cy, float cz, float tilt, float znear, float zfar, float hfov);
+void viewport(float vl, float vr, float vb, float vt);
+void display();
+
+//Matrix operation
+matrix matrix_mul(const matrix& a, const matrix& b);
+void print_matrix(const matrix& a);
+void identity_matrix(matrix& a);
+
+matrix matrix_translation(float x, float y, float z);
+matrix matrix_scaling(float sx, float sy, float sz);
+matrix matrix_rotation(float degree, int X_Y_Z_AXIS);
+
+//Vector opeartion
+vec4 mat_vec_mul(const matrix& A, const vec4& x);
+void print_vec4(const vec4& a);
+float dot_product(const vec4& a, const vec4& b);
+vec4 cross_product(const vec4& a, const vec4& b);
+vec4 normalize(vec4 v);
+
+//Drawing operation
+void connect_points(bool sqaure_or_triangle);
+void add_point(vec4 a);
+void clipping(point_data* n, float xmin, float xmax, float ymin, float ymax);
+int point_code(float x, float y, float xmin, float xmax, float ymin, float ymax);
+void clip_the_line(float& f, float& s, float& ff, float& ss, float edge, int codeA, int codeB);
+
+//variables decalration
+int height, width;
+int num_triangle = 0;
+int num_square = 0;
+int num_object = 0;
+bool first_endpoint = true;
+bool run = false;
+float R, G, B;
+float AR;
+
+point_data square_data[MAX_NUM_SQUARE];
+point_data triangle_data[MAX_NUM_TRIANGLE];
+point_data* cur_point;
+matrix model_matrix;
+matrix WVM,EM,PM,GRM,eyetilt;
+ASCModel cube[MAX_NUM_OBJECT];
+
+//Obeject
+void create_ojbect();
+
+//Others
+float deg2rad(float degree);
+float ratio(float a, float b);
+float delta(float a, float b);
+
+void readModel(string filename);
+ifstream fin;
+// Main
+void main(int ac, char** av)
+{
+	int winSizeX, winSizeY;
+	string name;
+	// initial();
+	if (ac == 3) {
+		winSizeX = atoi(av[1]);
+		winSizeY = atoi(av[2]);
+		//		cout<<"Done";
+	}
+	else { // default window size
+		winSizeX = 800;
+		winSizeY = 600;
+	}
+	cout << av[1] << endl;
+	fin.open(av[1],std::ifstream::in);
+
+	width = winSizeX;
+	height = winSizeY;
+	identity_matrix(model_matrix);
+
+	// initialize OpenGL utility toolkit (glut)
+	glutInit(&ac, av);
+
+	// single disply and RGB color mapping
+	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB); // set display mode
+	glutInitWindowSize(winSizeX, winSizeY);      // set window size
+	glutInitWindowPosition(0, 0);                // set window position on screen
+	glutCreateWindow("Lab3 Window");       // set window title
+
+	// set up the mouse and keyboard callback functions
+	//glutKeyboardFunc(myKeyboard); // register the keyboard action function
+
+	// displayFunc is called whenever there is a need to redisplay the window,
+	// e.g., when the window is exposed from under another window or when the window is de-iconified
+	glutDisplayFunc(displayFunc); // register the redraw function
+
+	// set background color
+	glClearColor(0.0, 0.0, 0.0, 0.0);     // set the background to black
+	glClear(GL_COLOR_BUFFER_BIT); // clear the buffer
+
+	// misc setup
+	glMatrixMode(GL_PROJECTION);  // setup coordinate system
+	glLoadIdentity();
+	gluOrtho2D(0, winSizeX, 0, winSizeY);
+	glShadeModel(GL_FLAT);
+	glFlush();
+	glutMainLoop();
+}
+
+
+void scale(float sx, float sy, float sz)
+{
+	model_matrix = matrix_mul(matrix_scaling(sx,sy,sz), model_matrix);
+	printf("Current matrix:\n");
+	print_matrix(model_matrix);
+}
+
+void rotate(float degreeX, float degreeY, float degreeZ)
+{
+	model_matrix = matrix_mul(matrix_rotation(degreeX, X_AXIS), model_matrix);
+	model_matrix = matrix_mul(matrix_rotation(degreeY, Y_AXIS), model_matrix);
+	model_matrix = matrix_mul(matrix_rotation(degreeZ, Z_AXIS), model_matrix);
+	// print_matrix(R);
+	printf("Current matrix:\n");
+	print_matrix(model_matrix);
+}
+
+void translate(float tx, float ty, float tz)
+{
+	model_matrix = matrix_mul(matrix_translation(tx,ty,tz), model_matrix);
+	printf("Current matrix:\n");
+	print_matrix(model_matrix);
+}
+
+//reset to identity matrix
+void reset()
+{
+	identity_matrix(model_matrix);
+	printf("Current matrix:\n");
+	print_matrix(model_matrix);
+}
+
+/******** Object space *************/
+
+//Generate object
+void square()
+{
+	printf("Transformation matrix:\n");
+	print_matrix(model_matrix);
+	connect_points(SQUARE);
+	num_square++;
+}
+
+void triangle()
+{
+	printf("Transformation matrix:\n");
+	print_matrix(model_matrix);
+	connect_points(TRIANGLE);
+	num_triangle++;
+}
+
+/****** end of object space ********/
+
+void view(float wxl, float wxr, float wyb, float wyt, float vxl, float vxr, float vyb, float vyt)
+{
+	//Generate the WVM
+	identity_matrix(WVM);
+	matrix T1, S2, T3;
+	T1 = matrix_translation(-wxl, -wyb, 0);
+	S2 = matrix_scaling(ratio(delta(vxl, vxr), delta(wxl, wxr)),
+						ratio(delta(vyb, vyt), delta(wyb, wyt)), 
+						1);
+	T3 = matrix_translation(vxl, vyb, 0);
+	WVM = matrix_mul(T3, matrix_mul(S2, T1));
+	// print_matrix(WVM);
+	// cout << endl;
+	// print_matrix(matrix_mul(WVM, model_matrix));
+
+	//View square
+	changeColor(RED);
+	for (int i = 0; i<num_square; i++)
+		clipping(&square_data[i], wxl, wxr, wyb, wyt);
+	glFlush();
+	//View triangle
+	changeColor(BLUE);
+	for (int i = 0; i<num_triangle; i++)
+		clipping(&triangle_data[i], wxl, wxr, wyb, wyt);
+	glFlush();
+
+	//draw the viewport
+	changeColor(WHITE);
+	for (int i = vxl; i <= vxr; i++)
+	{
+		drawDot(i, vyt, 1, 1, 1);
+		drawDot(i, vyb, 1, 1, 1);
+	}
+	for (int i = vyb + 1; i<vyt; i++)
+	{
+		drawDot(vxl, i, 1, 1, 1);
+		drawDot(vxr, i, 1, 1, 1);
+	}
+	glFlush();
+}
+
+void clearData()
+{
+	num_triangle = 0;
+	num_square = 0;
+}
+
+void clearScreen()
+{
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glFlush();
+}
+
+
+
+// Display function
+void displayFunc(void){
+
+	bool IsExit;
+	IsExit = false;
+	// clear the entire window to the background color
+	glClear(GL_COLOR_BUFFER_BIT);
+	while (!IsExit)
+	{
+		glClearColor(0.0, 0.0, 0.0, 0.0);
+		//	redraw();
+		// draw the contents!!! Iterate your object's data structure!
+		// flush the queue to actually paint the dots on the opengl window
+		glFlush();
+		ReadInput(IsExit);
+	}
+	while (1){
+
+	}
+	fin.close();
+	// exit(0);
+}
+
+
+void ReadInput(bool& IsExit)
+{
+
+	float sx, sy, sz, degreeX, degreeY, degreeZ, 
+		  tx, ty, tz, wxl, wxr, wyb, wyt, 
+		  vxl, vxr, vyt, vyb,
+		  vl,vr, vb, vt, 
+		  px ,py ,pz ,cx ,cy ,cz, tilt, znear, zfar, hfov;
+	string command, comment, filename;
+	fin >> command;
+	cout << "== Command: " << command;
+	if (command == "scale")
+	{
+		fin >> sx;
+		fin >> sy;
+		fin >> sz;
+		cout << " : " << fixed << setprecision(2) << sx << " " << sy << " "<< sz << endl;
+		scale(sx, sy, sz);
+	}
+	else if (command == "object")
+	{
+		fin >> filename;
+		cout << "[ " << filename << " ]" << endl;
+		readModel(filename);
+		create_ojbect();
+		num_object++;
+	}
+	else if (command == "viewport")
+	{
+		fin >> vl >> vr >> vb >> vt;
+		cout << "( " << vl << "," << vr << "," << vb << "," << vt << " )" << endl;
+		viewport(vl, vr, vb, vt);
+	}
+	else if (command == "observer")
+	{
+		fin >> px >> py >> pz >> cx >> cy >> cz >> tilt >> znear >> zfar >> hfov;
+		cout << px << " " << py << " " << pz << " " << cx << " " << cy << " " << cz << " " << endl 
+			 << tilt << " " << znear << " " << zfar << " " << hfov << endl;
+		observer(px, py, pz, cx, cy, cz, tilt, znear, zfar, hfov);
+	}
+	else if (command == "display")
+	{
+		cout << endl << "draw sreen!" << endl;
+		display();
+		glFlush();
+	}
+	else if (command == "rotate")
+	{
+		fin >> degreeX >> degreeY >> degreeZ;
+		cout << " : " << fixed << setprecision(2) <<  degreeX << " "  << degreeY << " " << degreeZ << " "  << endl;
+		rotate(degreeX, degreeY, degreeZ);
+	}
+	else if (command == "translate")
+	{
+		fin >> tx;
+		fin >> ty;
+		fin >> tz;
+		cout << " : " << fixed << setprecision(2) << tx << " " << ty << " " << tz << endl;
+		translate(tx, ty, tz);
+	}
+	else if (command == "reset")
+	{
+		cout << endl;
+		reset();
+	}
+	else if (command == "square")
+	{
+		cout << endl;
+		square();
+	}
+	else if (command == "triangle")
+	{
+		cout << endl;
+		triangle();
+	}
+	else if (command == "view")
+	{
+		fin >> wxl >> wxr >> wyb >> wyt >> vxl >> vxr >> vyb >> vyt;
+		cout << endl;
+		cout << "Worldspace:  ";
+		cout << fixed << setprecision(2) << wxl << " " << wxr << " " << wyb << " " << wyt << endl;
+		cout << "Viewport: ";
+		cout << fixed << setprecision(2) << vxl << " " << vxr << " " << vyb << " " << vyt << endl;
+		view(wxl, wxr, wyb, wyt, vxl, vxr, vyb, vyt);
+	}
+	else if (command == "clearData")
+	{
+		cout << endl;
+		clearData();
+		cout << "Data is clear" << endl;
+	}
+	else if (command == "clearScreen")
+	{
+		cout << "Screen is cleared" << endl;
+		cout << endl;
+		clearScreen();
+	}
+	else if (command == "end")
+	{
+		IsExit = true;
+		cout << endl;
+		// exit(0);
+	}
+	else if (command == "#")
+	{
+		getline(fin, comment);
+	}
+}
+
+//Matrix A multiply matrix B
+matrix matrix_mul(const matrix& a, const matrix& b)
+{
+	matrix c;
+	for (int i = 0; i<4; i++)
+		for (int j = 0; j<4; j++)
+			for (int k = 0; k<4; k++)
+				c.data[i][j] += a.data[i][k] * b.data[k][j];
+	return c;
+}
+
+//Print the current matrix
+void print_matrix(const matrix& a)
+{
+	for (int i = 0; i<4; i++)
+	{
+		printf("[ ");
+		for (int j = 0; j < 4; j++)
+			printf("%8.2f ", a.data[i][j]);
+		printf(" ]\n");
+
+	}
+	printf("\n");
+}
+
+//Identify a matrix
+void identity_matrix(matrix& a)
+{
+	a = matrix();
+	for (int i = 0; i<4; i++)
+		a.data[i][i] = 1;
+}
+
+//Change degree to radius
+float deg2rad(float degree)
+{
+	return degree / 180 * acos(-1);		//acos(-1) = PI
+}
+
+vec4 mat_vec_mul(const matrix& A, const vec4& x)
+{
+	vec4 b;
+	for (int i = 0; i<4; i++)
+		for (int j = 0; j<4; j++)
+			b.data[i] += A.data[i][j] * x.data[j];
+	return b;
+}
+
+void print_vec4(const vec4& a)
+{
+	printf("[ ");
+	for (int i = 0; i<4; i++)
+		printf("%lf ", a.data[i]);
+	printf("]\n");
+}
+
+//Connect all the points into a polygon
+void connect_points(bool sqaure_or_triangle)
+{
+	if (sqaure_or_triangle == SQUARE)
+	{
+		cur_point = &square_data[num_square];
+		add_point(vec4(1, 1, 0));
+		add_point(vec4(1, -1, 0));
+		add_point(vec4(-1, -1, 0));
+		add_point(vec4(-1, 1, 0));
+		cur_point->next = &square_data[num_square];
+	}
+	else	//triangle
+	{
+		cur_point = &triangle_data[num_triangle];
+		add_point(vec4(0, 1, 0));
+		add_point(vec4(1, -1, 0));
+		add_point(vec4(-1, -1, 0));
+
+		cur_point->next = &triangle_data[num_triangle];
+	}
+	first_endpoint = true;
+}
+
+//Calculate the point and add them to the polygon
+void add_point(vec4 a)
+{
+	if (first_endpoint)
+	{
+		*cur_point = point_data(mat_vec_mul(model_matrix, a));
+		first_endpoint = false;
+	}
+	else
+	{
+		cur_point->next = new point_data(mat_vec_mul(model_matrix, a));
+		cur_point = cur_point->next;
+	}
+}
+
+//Clipping the whole graphics
+void clipping(point_data* n, float xmin, float xmax, float ymin, float ymax)
+{
+	/*point_data* ptr = n;
+	bool first = true;
+	while (ptr != n || first)		// if not the first endpoint except the first time
+	{
+		first = false;
+		point_data* first_point = ptr;		point_data* second_point = ptr->next;
+		float
+			fx = first_point->x, fy = first_point->y,
+			sx = second_point->x, sy = second_point->y;
+		int
+			codeA = point_code(fx, fy, xmin, xmax, ymin, ymax),
+			codeB = point_code(sx, sy, xmin, xmax, ymin, ymax);
+		if (codeA == 0 && codeB == 0)	// accept the line
+		{
+			vec4 f = mat_vec_mul(WVM, vec4(fx, fy, 1));
+			vec4 s = mat_vec_mul(WVM, vec4(sx, sy, 1));
+			cout << "two points:" << endl;
+			print_vec4(f);
+			print_vec4(s);
+			cout << endl;
+			drawLine(f.data[0], s.data[0], f.data[1], s.data[1]);
+		}
+		else if ((codeA & codeB) != 0)	//reject the line and do nothing
+			;
+		else		//clipping the line or some mis-handle ones
+		{
+			// clipping the xmin edge & update code
+			clip_the_line(fx, sx, fy, sy, xmin, codeA & (1 << 3), codeB & (1 << 3));
+			codeA = point_code(fx, fy, xmin, xmax, ymin, ymax);
+			codeB = point_code(sx, sy, xmin, xmax, ymin, ymax);
+			// clipping the ymin edge & update code
+			clip_the_line(fy, sy, fx, sx, ymin, codeA & (1 << 1), codeB & (1 << 1));
+			codeA = point_code(fx, fy, xmin, xmax, ymin, ymax);
+			codeB = point_code(sx, sy, xmin, xmax, ymin, ymax);
+			// clipping the xmax edge & update code
+			clip_the_line(fx, sx, fy, sy, xmax, codeA & (1 << 2), codeB & (1 << 2));
+			codeA = point_code(fx, fy, xmin, xmax, ymin, ymax);
+			codeB = point_code(sx, sy, xmin, xmax, ymin, ymax);
+			// clipping the ymax edge & update code
+			clip_the_line(fy, sy, fx, sx, ymax, codeA & (1 << 0), codeB & (1 << 0));
+			codeA = point_code(fx, fy, xmin, xmax, ymin, ymax);
+			codeB = point_code(sx, sy, xmin, xmax, ymin, ymax);
+			vec4 f = mat_vec_mul(WVM, vec4(fx, fy, 1));
+			vec4 s = mat_vec_mul(WVM, vec4(sx, sy, 1));
+			cout << "two points:" << endl;
+			print_vec4(f);
+			print_vec4(s);
+			cout << endl;
+			drawLine(f.data[0], s.data[0], f.data[1], s.data[1]);
+		}
+		ptr = ptr->next;
+	}*/
+}
+
+matrix matrix_translation(float x, float y, float z)
+{
+	matrix T;
+	identity_matrix(T);
+	T.data[0][3] = x;
+	T.data[1][3] = y;
+	T.data[2][3] = z;
+	// T.data[3][3] = 0;
+ 	return T;
+}
+
+matrix matrix_scaling(float sx, float sy, float sz)
+{
+	matrix S;
+	identity_matrix(S);
+	S.data[0][0] *= sx;
+	S.data[1][1] *= sy;
+	S.data[2][2] *= sz;
+	return S;
+}
+
+matrix matrix_rotation(float degree, int X_Y_Z_AXIS)
+{
+	matrix rotation_matrix;
+	identity_matrix(rotation_matrix);
+	float sinv = sin(deg2rad(degree)),
+		  cosv = cos(deg2rad(degree));
+	if(X_Y_Z_AXIS == X_AXIS)
+	{
+		rotation_matrix.data[1][1] =  cosv;
+		rotation_matrix.data[1][2] = -sinv;
+		rotation_matrix.data[2][1] =  sinv;
+		rotation_matrix.data[2][2] =  cosv;
+	}
+	else if(X_Y_Z_AXIS == Y_AXIS)
+	{
+		rotation_matrix.data[0][0] =  cosv;
+		rotation_matrix.data[0][2] =  sinv;
+		rotation_matrix.data[2][0] = -sinv;
+		rotation_matrix.data[2][2] =  cosv;
+	}
+	else if(X_Y_Z_AXIS == Z_AXIS)
+	{
+		rotation_matrix.data[0][0] =  cosv;
+		rotation_matrix.data[0][1] = -sinv;
+		rotation_matrix.data[1][0] =  sinv;
+		rotation_matrix.data[1][1] =  cosv;
+	}
+	return rotation_matrix;
+}
+
+float ratio(float a, float b)
+{
+	return a / b;
+}
+
+float delta(float a, float b)
+{
+	return abs(a - b);
+}
+
+int point_code(float x, float y, float xmin, float xmax, float ymin, float ymax)
+{
+	int code = 0;
+	if (y > ymax)
+		code += 1;
+	if (y < ymin)
+		code += 2;
+	if (x > xmax)
+		code += 4;
+	if (x < xmin)
+		code += 8;
+	return code;
+}
+
+void clip_the_line(float& f, float& s, float& ff, float& ss, float edge, int codeA, int codeB)
+{
+	float r = (ss - ff) / (s - f);
+	if (codeA && codeB)	//both points are outside, then reject them
+		;
+	else if (codeA)		//first point is outside
+	{
+		ff = r * (edge - f) + ff;
+		f = edge;
+	}
+	else if (codeB)	//second point is outside
+	{
+		ss = r * (edge - s) + ss;
+		s = edge;
+	}
+	else			//both points are inside, and it's impossible
+		;
+}
+
+void changeColor(int color)
+{
+	if (color == RED)
+	{
+		R = 1;
+		G = B = 0;
+	}
+	else if (color == BLUE)
+	{
+		B = 0.55;
+		G = 0.5;
+		R = 0;
+	}
+	else if (color == WHITE)
+		R = G = B = 1;
+}
+
+void readModel(string filename)
+{
+	ifstream modelin(filename);
+	//int n;
+	// get number of vertex/face first
+	modelin >> cube[num_object].num_vertex >> cube[num_object].num_face;
+
+	// read vertex one by one
+	for(int i=0; i<cube[num_object].num_vertex; ++i) {
+	  modelin >> cube[num_object].vertex[i][0] >> cube[num_object].vertex[i][1]>> cube[num_object].vertex[i][2];
+	}
+	// read face one by one
+	for(int i=0; i<cube[num_object].num_face; ++i) {
+		modelin	>> cube[num_object].face[i][0];
+		for (int j = 1; j <= cube[num_object].face[i][0]; j++)
+			modelin >> cube[num_object].face[i][j];
+	}
+}
+
+void create_ojbect()
+{
+	for(int i=0; i<cube[num_object].num_vertex; ++i)
+	{
+		float& x = cube[num_object].vertex[i][0],
+			 & y = cube[num_object].vertex[i][1],
+			 & z = cube[num_object].vertex[i][2];
+		vec4 v = mat_vec_mul(model_matrix, vec4(x,y,z));
+		x = v.data[0];
+		y = v.data[1];
+		z = v.data[2];
+	}
+}
+
+float dot_product(const vec4& a, const vec4& b)
+{
+	return a.data[0] * b.data[0] +
+		   a.data[1] * b.data[1] +
+		   a.data[2] * b.data[2];
+}
+
+vec4 cross_product(const vec4& a, const vec4& b)
+{
+	vec4 c;
+	float xa = a.data[0],
+		  xb = b.data[0],
+		  ya = a.data[1],
+		  yb = b.data[1],
+		  za = a.data[2],
+		  zb = b.data[2];
+	c.data[0] =  ya * zb - yb * za;
+	c.data[1] = -xa * zb + xb * za;
+	c.data[2] =  xa * yb - xb * ya;
+	return c;
+}
+
+
+
+vec4 normalize(vec4 v)
+{
+	float len = v.length();
+	v.data[0] /= len;
+	v.data[1] /= len;
+	v.data[2] /= len;
+	return v;
+}
+
+void observer(float px, float py, float pz, float cx, float cy, float cz, float tilt, float znear, float zfar, float hfov)
+{
+
+	//GRM
+	vec4 view_vector(cx-px, cy-py, cz-pz, 0);
+	vec4 v3 = normalize(view_vector);
+	vec4 v1 = cross_product(vec4(0,1,0,0), v3);
+	v1 = normalize(v1);
+	vec4 v2 = cross_product(v3, v1);
+	v2 = normalize(v2);
+	GRM = matrix(v1,v2,v3,vec4(0,0,0,1));
+	//EM
+	matrix Teye = matrix_translation(-px, -py, -pz);
+	printf("Eye translation matrix:\n");
+	print_matrix(Teye);
+	
+	eyetilt = matrix_rotation(-tilt, Z_AXIS);
+	printf("Eye tilt matrix:\n");
+	print_matrix(eyetilt);
+	
+	printf("GRM:\n");
+	print_matrix(GRM);
+	matrix mirror;
+	identity_matrix(mirror);
+	mirror.data[0][0] = -1;
+	EM = matrix_mul(eyetilt, matrix_mul(mirror, matrix_mul(GRM, Teye)));
+
+	//PM
+	identity_matrix(PM);
+	PM.data[1][1] = AR;
+	PM.data[2][2] = tan(deg2rad(hfov)) * zfar / (zfar - znear);
+	PM.data[2][3] = zfar * znear / (znear - zfar) * tan(deg2rad(hfov));
+	PM.data[3][2] = tan(deg2rad(hfov));
+	PM.data[3][3] = 0;
+	
+
+	//Pd
+}
+
+void viewport(float vl,float vr,float vb,float vt)
+{
+	//AR
+	AR = ratio(delta(vl, vr), delta(vb,vt));
+	PM.data[1][1] = AR;
+	print_matrix(PM);
+
+	//WVM
+	identity_matrix(WVM);
+	matrix T1, S2, T3;
+	T1 = matrix_translation(1, 1, 0);
+	S2 = matrix_scaling(ratio(delta(vl, vr), delta(-1, 1)),
+						ratio(delta(vb, vt), delta(-1, 1)), 
+						1);
+	T3 = matrix_translation(vl, vb, 0);
+	WVM = matrix_mul(T3, matrix_mul(S2, T1));
+	cout << "WVM" << endl;
+	print_matrix(WVM);
+}
+
+void display()
+{
+	matrix final;
+	final = matrix_mul(WVM, matrix_mul(PM, EM));
+	// final = matrix_mul(WVM, matrix(vec4(0.90,  -0.14, -0.42,   0),
+	// 							   vec4(-0.18,  1.08, -0.76,  0),
+	// 							   vec4(-0.24, -0.33, -0.41,   3.50),
+	// 							   vec4(-0.24, -0.33, -0.41,   4.08)));
+	cout << "PM * EM" << endl;
+	print_matrix(matrix_mul(PM, EM));
+
+	for(int i=0; i<num_object; i++)
+	{
+		ASCModel c = cube[i];
+		int face_num = c.num_face;
+		for(int j=0; j<face_num; j++)
+		{
+			// cout << "face points: ";
+			int vec_num = c.face[j][1];
+			// cout << vec_num << endl;
+			vec4 previous(c.vertex[vec_num-1][0],
+						  c.vertex[vec_num-1][1],
+						  c.vertex[vec_num-1][2]);
+			vec4 fp;
+			previous = mat_vec_mul(final, previous);
+			fp = previous;
+			// print_vec4(previous);
+			for(int k=2; k<=c.face[j][0]; k++)
+			{
+				// cout << "face points: ";
+				vec_num = c.face[j][k];
+				// cout << vec_num << endl;
+				vec4 cur(c.vertex[vec_num-1][0],
+						  c.vertex[vec_num-1][1],
+						  c.vertex[vec_num-1][2]);
+				cur= mat_vec_mul(final, cur);
+				// print_vec4(cur);
+			/*	cout << "original points:\n";
+				cout <<  previous.data[0]/previous.data[3] << " " << 
+						 previous.data[1]/previous.data[3] << " " <<
+						 	  cur.data[0]/	   cur.data[3] << " " <<
+						 	  cur.data[1]/	   cur.data[3] << endl;*/
+				drawLine(previous.data[0]/previous.data[3],
+						 	  cur.data[0]/	   cur.data[3],
+						 previous.data[1]/previous.data[3],
+						 	  cur.data[1]/	   cur.data[3]);
+				if (k == c.face[j][0])
+				{
+					// cout << "last line:\n";
+					previous = fp;
+					drawLine(previous.data[0] / previous.data[3],
+								  cur.data[0] / 	 cur.data[3],
+						 	 previous.data[1] / previous.data[3],
+						 		  cur.data[1] / 	 cur.data[3]);
+				}
+				// glFlush();
+				previous = cur;
+				// cout << endl;
+			}
+		}
+	}	
+}
