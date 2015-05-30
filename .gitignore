@@ -8,3 +8,5 @@
 *.filters
 *.sdf
 *.opensdf
+/HelloGlut/Jason
+/HelloGlut/Debug
