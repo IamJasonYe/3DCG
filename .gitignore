@@ -8,5 +8,6 @@
 *.filters
 *.sdf
 *.opensdf
-/HelloGlut/Jason
-/HelloGlut/Debug
+/3DCG_Hw3/HelloGlut/Jason
+/3DCG_Hw3/HelloGlut/Debug
+/3DCG_Hw3/ipch
