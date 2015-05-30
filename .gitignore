@@ -11,3 +11,10 @@
 /3DCG_Hw3/HelloGlut/Jason
 /3DCG_Hw3/HelloGlut/Debug
 /3DCG_Hw3/ipch
+/3DCG_Hw3/Debug/*.exe
+/3DCG_Hw3/Debug/*.ilk
+/3DCG_Hw3/Debug/*.pdb
+/3DCG_Hw3/HelloGlut/*.sln
+/3DCG_Hw3/HelloGlut/*.suo
+/3DCG_Hw3/HelloGlut/*.vcxproj
+/3DCG_Hw3/HelloGlut/*sublime-workspace
