@@ -10,8 +10,6 @@
 #include <string>
 #include <cstdio>
 #include <fstream>
-#define  MAX_NUM_TRIANGLE 100
-#define  MAX_NUM_SQUARE 100
 #define  MAX_NUM_OBJECT 10
 #define  MAX_ASC_MODEL_VERTEX 1980	//Adjust following by teapot.asc
 #define  MAX_ASC_MODEL_FACE   3760	//Adjust following by teapot.asc
@@ -20,9 +18,6 @@ const int X_AXIS = 0,
 		  Y_AXIS = 1,
 		  Z_AXIS = 2;
 
-
-const bool SQUARE = true,
-		   TRIANGLE = false;
 const int RED = 0,
 		  BLUE = 1,
 		  WHITE = 2;
@@ -32,7 +27,7 @@ struct ASCModel
 {
     int   num_vertex;
     int   num_face;
-    float vertex[MAX_ASC_MODEL_VERTEX][3]; 
+	float vertex[MAX_ASC_MODEL_VERTEX][3];
     int   face[MAX_ASC_MODEL_FACE][5];
 };
 
@@ -104,14 +99,10 @@ struct point_data
 //functions declaration
 void displayFunc(void);
 void ReadInput(bool& IsExit);
-
 void scale(float sx, float sy, float sz);
 void rotate(float degreeX, float degreeY, float degreeZ);
 void translate(float tx, float ty, float tz);
 void reset();
-void square();
-void triangle();
-void view(float wxl, float wxr, float wyb, float wyt, float vxl, float vxr, float vyb, float vyt);
 void clearData();
 void clearScreen();
 void observer(float px, float py, float pz, float cx, float cy, float cz, float tilt, float znear, float zfar, float hfov);
@@ -119,10 +110,9 @@ void viewport(float vl, float vr, float vb, float vt);
 void display();
 
 //Matrix operation
-matrix matrix_mul(const matrix& a, const matrix& b);
 void print_matrix(const matrix& a);
 void identity_matrix(matrix& a);
-
+matrix matrix_mul(const matrix& a, const matrix& b);
 matrix matrix_translation(float x, float y, float z);
 matrix matrix_scaling(float sx, float sy, float sz);
 matrix matrix_rotation(float degree, int X_Y_Z_AXIS);
@@ -134,25 +124,11 @@ float dot_product(const vec4& a, const vec4& b);
 vec4 cross_product(const vec4& a, const vec4& b);
 vec4 normalize(vec4 v);
 
-//Drawing operation
-void connect_points(bool sqaure_or_triangle);
-void add_point(vec4 a);
-void clipping(point_data* n, float xmin, float xmax, float ymin, float ymax);
-int point_code(float x, float y, float xmin, float xmax, float ymin, float ymax);
-void clip_the_line(float& f, float& s, float& ff, float& ss, float edge, int codeA, int codeB);
-
 //variables decalration
 int height, width;
-int num_triangle = 0;
-int num_square = 0;
 int num_object = 0;
 bool first_endpoint = true;
-bool run = false;
-float R, G, B;
 float AR;
-
-point_data square_data[MAX_NUM_SQUARE];
-point_data triangle_data[MAX_NUM_TRIANGLE];
 point_data* cur_point;
 matrix model_matrix;
 matrix WVM,EM,PM,GRM,eyetilt;
@@ -165,9 +141,9 @@ void create_ojbect();
 float deg2rad(float degree);
 float ratio(float a, float b);
 float delta(float a, float b);
-
 void readModel(string filename);
 ifstream fin;
+
 // Main
 void main(int ac, char** av)
 {
@@ -198,7 +174,6 @@ void main(int ac, char** av)
 	glutInitWindowSize(winSizeX, winSizeY);      // set window size
 	glutInitWindowPosition(0, 0);                // set window position on screen
 	glutCreateWindow("Lab3 Window");       // set window title
-
 	// set up the mouse and keyboard callback functions
 	//glutKeyboardFunc(myKeyboard); // register the keyboard action function
 
@@ -252,72 +227,10 @@ void reset()
 	print_matrix(model_matrix);
 }
 
-/******** Object space *************/
-
-//Generate object
-void square()
-{
-	printf("Transformation matrix:\n");
-	print_matrix(model_matrix);
-	connect_points(SQUARE);
-	num_square++;
-}
-
-void triangle()
-{
-	printf("Transformation matrix:\n");
-	print_matrix(model_matrix);
-	connect_points(TRIANGLE);
-	num_triangle++;
-}
-
-/****** end of object space ********/
-
-void view(float wxl, float wxr, float wyb, float wyt, float vxl, float vxr, float vyb, float vyt)
-{
-	//Generate the WVM
-	identity_matrix(WVM);
-	matrix T1, S2, T3;
-	T1 = matrix_translation(-wxl, -wyb, 0);
-	S2 = matrix_scaling(ratio(delta(vxl, vxr), delta(wxl, wxr)),
-						ratio(delta(vyb, vyt), delta(wyb, wyt)), 
-						1);
-	T3 = matrix_translation(vxl, vyb, 0);
-	WVM = matrix_mul(T3, matrix_mul(S2, T1));
-	// print_matrix(WVM);
-	// cout << endl;
-	// print_matrix(matrix_mul(WVM, model_matrix));
-
-	//View square
-	changeColor(RED);
-	for (int i = 0; i<num_square; i++)
-		clipping(&square_data[i], wxl, wxr, wyb, wyt);
-	glFlush();
-	//View triangle
-	changeColor(BLUE);
-	for (int i = 0; i<num_triangle; i++)
-		clipping(&triangle_data[i], wxl, wxr, wyb, wyt);
-	glFlush();
-
-	//draw the viewport
-	changeColor(WHITE);
-	for (int i = vxl; i <= vxr; i++)
-	{
-		drawDot(i, vyt, 1, 1, 1);
-		drawDot(i, vyb, 1, 1, 1);
-	}
-	for (int i = vyb + 1; i<vyt; i++)
-	{
-		drawDot(vxl, i, 1, 1, 1);
-		drawDot(vxr, i, 1, 1, 1);
-	}
-	glFlush();
-}
 
 void clearData()
 {
-	num_triangle = 0;
-	num_square = 0;
+	num_object = 0;
 }
 
 void clearScreen()
@@ -357,8 +270,7 @@ void ReadInput(bool& IsExit)
 {
 
 	float sx, sy, sz, degreeX, degreeY, degreeZ, 
-		  tx, ty, tz, wxl, wxr, wyb, wyt, 
-		  vxl, vxr, vyt, vyb,
+		  tx, ty, tz,
 		  vl,vr, vb, vt, 
 		  px ,py ,pz ,cx ,cy ,cz, tilt, znear, zfar, hfov;
 	string command, comment, filename;
@@ -418,26 +330,6 @@ void ReadInput(bool& IsExit)
 		cout << endl;
 		reset();
 	}
-	else if (command == "square")
-	{
-		cout << endl;
-		square();
-	}
-	else if (command == "triangle")
-	{
-		cout << endl;
-		triangle();
-	}
-	else if (command == "view")
-	{
-		fin >> wxl >> wxr >> wyb >> wyt >> vxl >> vxr >> vyb >> vyt;
-		cout << endl;
-		cout << "Worldspace:  ";
-		cout << fixed << setprecision(2) << wxl << " " << wxr << " " << wyb << " " << wyt << endl;
-		cout << "Viewport: ";
-		cout << fixed << setprecision(2) << vxl << " " << vxr << " " << vyb << " " << vyt << endl;
-		view(wxl, wxr, wyb, wyt, vxl, vxr, vyb, vyt);
-	}
 	else if (command == "clearData")
 	{
 		cout << endl;
@@ -459,6 +351,7 @@ void ReadInput(bool& IsExit)
 	else if (command == "#")
 	{
 		getline(fin, comment);
+		cout << endl;
 	}
 }
 
@@ -518,101 +411,6 @@ void print_vec4(const vec4& a)
 	printf("]\n");
 }
 
-//Connect all the points into a polygon
-void connect_points(bool sqaure_or_triangle)
-{
-	if (sqaure_or_triangle == SQUARE)
-	{
-		cur_point = &square_data[num_square];
-		add_point(vec4(1, 1, 0));
-		add_point(vec4(1, -1, 0));
-		add_point(vec4(-1, -1, 0));
-		add_point(vec4(-1, 1, 0));
-		cur_point->next = &square_data[num_square];
-	}
-	else	//triangle
-	{
-		cur_point = &triangle_data[num_triangle];
-		add_point(vec4(0, 1, 0));
-		add_point(vec4(1, -1, 0));
-		add_point(vec4(-1, -1, 0));
-
-		cur_point->next = &triangle_data[num_triangle];
-	}
-	first_endpoint = true;
-}
-
-//Calculate the point and add them to the polygon
-void add_point(vec4 a)
-{
-	if (first_endpoint)
-	{
-		*cur_point = point_data(mat_vec_mul(model_matrix, a));
-		first_endpoint = false;
-	}
-	else
-	{
-		cur_point->next = new point_data(mat_vec_mul(model_matrix, a));
-		cur_point = cur_point->next;
-	}
-}
-
-//Clipping the whole graphics
-void clipping(point_data* n, float xmin, float xmax, float ymin, float ymax)
-{
-	/*point_data* ptr = n;
-	bool first = true;
-	while (ptr != n || first)		// if not the first endpoint except the first time
-	{
-		first = false;
-		point_data* first_point = ptr;		point_data* second_point = ptr->next;
-		float
-			fx = first_point->x, fy = first_point->y,
-			sx = second_point->x, sy = second_point->y;
-		int
-			codeA = point_code(fx, fy, xmin, xmax, ymin, ymax),
-			codeB = point_code(sx, sy, xmin, xmax, ymin, ymax);
-		if (codeA == 0 && codeB == 0)	// accept the line
-		{
-			vec4 f = mat_vec_mul(WVM, vec4(fx, fy, 1));
-			vec4 s = mat_vec_mul(WVM, vec4(sx, sy, 1));
-			cout << "two points:" << endl;
-			print_vec4(f);
-			print_vec4(s);
-			cout << endl;
-			drawLine(f.data[0], s.data[0], f.data[1], s.data[1]);
-		}
-		else if ((codeA & codeB) != 0)	//reject the line and do nothing
-			;
-		else		//clipping the line or some mis-handle ones
-		{
-			// clipping the xmin edge & update code
-			clip_the_line(fx, sx, fy, sy, xmin, codeA & (1 << 3), codeB & (1 << 3));
-			codeA = point_code(fx, fy, xmin, xmax, ymin, ymax);
-			codeB = point_code(sx, sy, xmin, xmax, ymin, ymax);
-			// clipping the ymin edge & update code
-			clip_the_line(fy, sy, fx, sx, ymin, codeA & (1 << 1), codeB & (1 << 1));
-			codeA = point_code(fx, fy, xmin, xmax, ymin, ymax);
-			codeB = point_code(sx, sy, xmin, xmax, ymin, ymax);
-			// clipping the xmax edge & update code
-			clip_the_line(fx, sx, fy, sy, xmax, codeA & (1 << 2), codeB & (1 << 2));
-			codeA = point_code(fx, fy, xmin, xmax, ymin, ymax);
-			codeB = point_code(sx, sy, xmin, xmax, ymin, ymax);
-			// clipping the ymax edge & update code
-			clip_the_line(fy, sy, fx, sx, ymax, codeA & (1 << 0), codeB & (1 << 0));
-			codeA = point_code(fx, fy, xmin, xmax, ymin, ymax);
-			codeB = point_code(sx, sy, xmin, xmax, ymin, ymax);
-			vec4 f = mat_vec_mul(WVM, vec4(fx, fy, 1));
-			vec4 s = mat_vec_mul(WVM, vec4(sx, sy, 1));
-			cout << "two points:" << endl;
-			print_vec4(f);
-			print_vec4(s);
-			cout << endl;
-			drawLine(f.data[0], s.data[0], f.data[1], s.data[1]);
-		}
-		ptr = ptr->next;
-	}*/
-}
 
 matrix matrix_translation(float x, float y, float z)
 {
@@ -673,56 +471,6 @@ float ratio(float a, float b)
 float delta(float a, float b)
 {
 	return abs(a - b);
-}
-
-int point_code(float x, float y, float xmin, float xmax, float ymin, float ymax)
-{
-	int code = 0;
-	if (y > ymax)
-		code += 1;
-	if (y < ymin)
-		code += 2;
-	if (x > xmax)
-		code += 4;
-	if (x < xmin)
-		code += 8;
-	return code;
-}
-
-void clip_the_line(float& f, float& s, float& ff, float& ss, float edge, int codeA, int codeB)
-{
-	float r = (ss - ff) / (s - f);
-	if (codeA && codeB)	//both points are outside, then reject them
-		;
-	else if (codeA)		//first point is outside
-	{
-		ff = r * (edge - f) + ff;
-		f = edge;
-	}
-	else if (codeB)	//second point is outside
-	{
-		ss = r * (edge - s) + ss;
-		s = edge;
-	}
-	else			//both points are inside, and it's impossible
-		;
-}
-
-void changeColor(int color)
-{
-	if (color == RED)
-	{
-		R = 1;
-		G = B = 0;
-	}
-	else if (color == BLUE)
-	{
-		B = 0.55;
-		G = 0.5;
-		R = 0;
-	}
-	else if (color == WHITE)
-		R = G = B = 1;
 }
 
 void readModel(string filename)
@@ -912,3 +660,4 @@ void display()
 		}
 	}	
 }
+
