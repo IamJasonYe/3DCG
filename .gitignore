@@ -1,7 +1,7 @@
 /3DCG_Hw
 /3DCG_Hw1
-*.sln,
-*.suo,
+*.sln
+*.suo
 *.exe
 *.zip
 *.user
