@@ -1,2 +1,10 @@
 /3DCG_Hw
 /3DCG_Hw1
+*.sln,
+*.suo,
+*.exe
+*.zip
+*.user
+*.filters
+*.sdf
+*.opensdf
