@@ -304,8 +304,8 @@ void ReadInput(bool& IsExit)
 		cout << px << " " << py << " " << pz << " )"<<endl;
 		cout << "Center of interest: (" 
 			 << cx << " " << cy << " " << cz << " )" << endl; 
-		cout << "【Tilt angle】: " << tilt << endl 
-			 <<"【Near plane】: " << znear << "\n【Far Plane】:" << zfar << "\n【Half field of view (angle)】:" << hfov << endl;
+		cout << "【Tilt angle�? " << tilt << endl 
+			 <<"【Near plane�? " << znear << "\n【Far Plane�?" << zfar << "\n【Half field of view (angle)�?" << hfov << endl;
 		observer(px, py, pz, cx, cy, cz, tilt, znear, zfar, hfov);
 	}
 	else if (command == "display")
