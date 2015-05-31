@@ -16,19 +16,19 @@
 using namespace std;
 
 const int X_AXIS = 0,
-		  Y_AXIS = 1,
-		  Z_AXIS = 2;
+Y_AXIS = 1,
+Z_AXIS = 2;
 
 const int RED = 0,
-		  BLUE = 1,
-		  WHITE = 2;
+BLUE = 1,
+WHITE = 2;
 
-struct ASCModel 
+struct ASCModel
 {
-    int   num_vertex;
-    int   num_face;
+	int   num_vertex;
+	int   num_face;
 	float vertex[MAX_ASC_MODEL_VERTEX][3];
-    int   face[MAX_ASC_MODEL_FACE][5];
+	int   face[MAX_ASC_MODEL_FACE][5];
 };
 
 struct vec4
@@ -36,7 +36,7 @@ struct vec4
 	float data[4];
 	vec4(){ data[0] = data[1] = data[2] = data[3] = 0; };
 	// vec4(float x, float y, float z, float w) TODO:need to fix the overload problem
-	vec4(float x, float y, float z, float w=1)
+	vec4(float x, float y, float z, float w = 1)
 	{
 		data[0] = x;
 		data[1] = y;
@@ -73,7 +73,7 @@ struct matrix
 	}
 	matrix(const vec4& v1, const vec4& v2, const vec4& v3, const vec4& v4)
 	{
-		for(int i=0; i<4; i++)
+		for (int i = 0; i<4; i++)
 		{
 			data[0][i] = v1.data[i];
 			data[1][i] = v2.data[i];
@@ -129,11 +129,11 @@ bool first_endpoint = true;
 float AR;
 point_data* cur_point;
 matrix model_matrix;
-matrix WVM,EM,PM,GRM,eyetilt;
+matrix WVM, EM, PM, GRM, eyetilt;
 ASCModel cube[MAX_NUM_OBJECT];
 
 //Obeject
-void create_ojbect();
+void create_object();
 
 //Others
 float deg2rad(float degree);
@@ -157,7 +157,7 @@ void main(int ac, char** av)
 		winSizeY = 600;
 	}
 	cout << av[1] << endl;
-	fin.open(av[1],std::ifstream::in);
+	fin.open(av[1], std::ifstream::in);
 
 	width = winSizeX;
 	height = winSizeY;
@@ -194,7 +194,7 @@ void main(int ac, char** av)
 
 void scale(float sx, float sy, float sz)
 {
-	model_matrix = matrix_mul(matrix_scaling(sx,sy,sz), model_matrix);
+	model_matrix = matrix_mul(matrix_scaling(sx, sy, sz), model_matrix);
 	printf("Current matrix:\n");
 	print_matrix(model_matrix);
 }
@@ -211,7 +211,7 @@ void rotate(float degreeX, float degreeY, float degreeZ)
 
 void translate(float tx, float ty, float tz)
 {
-	model_matrix = matrix_mul(matrix_translation(tx,ty,tz), model_matrix);
+	model_matrix = matrix_mul(matrix_translation(tx, ty, tz), model_matrix);
 	printf("Current matrix:\n");
 	print_matrix(model_matrix);
 }
@@ -255,9 +255,6 @@ void displayFunc(void){
 		glFlush();
 		ReadInput(IsExit);
 	}
-	while (1){
-
-	}
 	fin.close();
 	// exit(0);
 }
@@ -266,10 +263,10 @@ void displayFunc(void){
 void ReadInput(bool& IsExit)
 {
 
-	float sx, sy, sz, degreeX, degreeY, degreeZ, 
-		  tx, ty, tz,
-		  vl,vr, vb, vt, 
-		  px ,py ,pz ,cx ,cy ,cz, tilt, znear, zfar, hfov;
+	float sx, sy, sz, degreeX, degreeY, degreeZ,
+		tx, ty, tz,
+		vl, vr, vb, vt,
+		px, py, pz, cx, cy, cz, tilt, znear, zfar, hfov;
 	string command, comment, filename;
 	fin >> command;
 	cout << "== Command: " << command;
@@ -278,7 +275,7 @@ void ReadInput(bool& IsExit)
 		fin >> sx;
 		fin >> sy;
 		fin >> sz;
-		cout << " : " << fixed << setprecision(2) << sx << " " << sy << " "<< sz << endl;
+		cout << " : " << fixed << setprecision(2) << sx << " " << sy << " " << sz << endl;
 		scale(sx, sy, sz);
 	}
 	else if (command == "object")
@@ -287,7 +284,7 @@ void ReadInput(bool& IsExit)
 		cout << "[ " << filename << " ]" << endl;
 		readModel(filename);
 		cout << "Read object sucessfully!" << endl;
-		create_ojbect();
+		create_object();
 		cout << "Created ojbect!" << endl;
 		num_object++;
 	}
@@ -301,11 +298,11 @@ void ReadInput(bool& IsExit)
 	{
 		fin >> px >> py >> pz >> cx >> cy >> cz >> tilt >> znear >> zfar >> hfov;
 		cout << "Eye position: (";
-		cout << px << " " << py << " " << pz << " )"<<endl;
-		cout << "Center of interest: (" 
-			 << cx << " " << cy << " " << cz << " )" << endl; 
-		cout << "ã€Tilt angleã€? " << tilt << endl 
-			 <<"ã€Near planeã€? " << znear << "\nã€Far Planeã€?" << zfar << "\nã€Half field of view (angle)ã€?" << hfov << endl;
+		cout << px << " " << py << " " << pz << " )" << endl;
+		cout << "Center of interest: ("
+			<< cx << " " << cy << " " << cz << " )" << endl;
+		cout << "ã€Tilt angleã€? " << tilt << endl
+			<< "ã€Near planeã€? " << znear << "\nã€Far Planeã€?" << zfar << "\nã€Half field of view (angle)ã€?" << hfov << endl;
 		observer(px, py, pz, cx, cy, cz, tilt, znear, zfar, hfov);
 	}
 	else if (command == "display")
@@ -317,7 +314,7 @@ void ReadInput(bool& IsExit)
 	else if (command == "rotate")
 	{
 		fin >> degreeX >> degreeY >> degreeZ;
-		cout << " : " << fixed << setprecision(2) <<  degreeX << " "  << degreeY << " " << degreeZ << " "  << endl;
+		cout << " : " << fixed << setprecision(2) << degreeX << " " << degreeY << " " << degreeZ << " " << endl;
 		rotate(degreeX, degreeY, degreeZ);
 	}
 	else if (command == "translate")
@@ -425,7 +422,7 @@ matrix matrix_translation(float x, float y, float z)
 	T.data[0][3] = x;
 	T.data[1][3] = y;
 	T.data[2][3] = z;
- 	return T;
+	return T;
 }
 
 //Scale 
@@ -445,27 +442,27 @@ matrix matrix_rotation(float degree, int X_Y_Z_AXIS)
 	matrix rotation_matrix;
 	identity_matrix(rotation_matrix);
 	float sinv = sin(deg2rad(degree)),
-		  cosv = cos(deg2rad(degree));
-	if(X_Y_Z_AXIS == X_AXIS)
+		cosv = cos(deg2rad(degree));
+	if (X_Y_Z_AXIS == X_AXIS)
 	{
-		rotation_matrix.data[1][1] =  cosv;
+		rotation_matrix.data[1][1] = cosv;
 		rotation_matrix.data[1][2] = -sinv;
-		rotation_matrix.data[2][1] =  sinv;
-		rotation_matrix.data[2][2] =  cosv;
+		rotation_matrix.data[2][1] = sinv;
+		rotation_matrix.data[2][2] = cosv;
 	}
-	else if(X_Y_Z_AXIS == Y_AXIS)
+	else if (X_Y_Z_AXIS == Y_AXIS)
 	{
-		rotation_matrix.data[0][0] =  cosv;
-		rotation_matrix.data[0][2] =  sinv;
+		rotation_matrix.data[0][0] = cosv;
+		rotation_matrix.data[0][2] = sinv;
 		rotation_matrix.data[2][0] = -sinv;
-		rotation_matrix.data[2][2] =  cosv;
+		rotation_matrix.data[2][2] = cosv;
 	}
-	else if(X_Y_Z_AXIS == Z_AXIS)
+	else if (X_Y_Z_AXIS == Z_AXIS)
 	{
-		rotation_matrix.data[0][0] =  cosv;
+		rotation_matrix.data[0][0] = cosv;
 		rotation_matrix.data[0][1] = -sinv;
-		rotation_matrix.data[1][0] =  sinv;
-		rotation_matrix.data[1][1] =  cosv;
+		rotation_matrix.data[1][0] = sinv;
+		rotation_matrix.data[1][1] = cosv;
 	}
 	return rotation_matrix;
 }
@@ -488,27 +485,27 @@ void readModel(string filename)
 	modelin >> cube[num_object].num_vertex >> cube[num_object].num_face;
 
 	// read vertex one by one
-	for(int i=0; i<cube[num_object].num_vertex; ++i) {
-	  modelin >> cube[num_object].vertex[i][0] >> cube[num_object].vertex[i][1]>> cube[num_object].vertex[i][2];
+	for (int i = 0; i<cube[num_object].num_vertex; ++i) {
+		modelin >> cube[num_object].vertex[i][0] >> cube[num_object].vertex[i][1] >> cube[num_object].vertex[i][2];
 	}
 	// read face one by one
-	for(int i=0; i<cube[num_object].num_face; ++i) 
+	for (int i = 0; i<cube[num_object].num_face; ++i)
 	{
-		modelin	>> cube[num_object].face[i][0];
+		modelin >> cube[num_object].face[i][0];
 		for (int j = 1; j <= cube[num_object].face[i][0]; j++)
 			modelin >> cube[num_object].face[i][j];
 	}
 }
 
 //Create the object based on the model matrix
-void create_ojbect()
+void create_object()
 {
-	for(int i=0; i<cube[num_object].num_vertex; ++i)
+	for (int i = 0; i<cube[num_object].num_vertex; ++i)
 	{
 		float& x = cube[num_object].vertex[i][0],
-			 & y = cube[num_object].vertex[i][1],
-			 & z = cube[num_object].vertex[i][2];
-		vec4 v = mat_vec_mul(model_matrix, vec4(x,y,z));
+			&y = cube[num_object].vertex[i][1],
+			&z = cube[num_object].vertex[i][2];
+		vec4 v = mat_vec_mul(model_matrix, vec4(x, y, z));
 		x = v.data[0];
 		y = v.data[1];
 		z = v.data[2];
@@ -519,8 +516,8 @@ void create_ojbect()
 float dot_product(const vec4& a, const vec4& b)
 {
 	return a.data[0] * b.data[0] +
-		   a.data[1] * b.data[1] +
-		   a.data[2] * b.data[2];
+		a.data[1] * b.data[1] +
+		a.data[2] * b.data[2];
 }
 
 //Cross product of two vectors
@@ -528,14 +525,14 @@ vec4 cross_product(const vec4& a, const vec4& b)
 {
 	vec4 c;
 	float xa = a.data[0],
-		  xb = b.data[0],
-		  ya = a.data[1],
-		  yb = b.data[1],
-		  za = a.data[2],
-		  zb = b.data[2];
-	c.data[0] =  ya * zb - yb * za;
+		xb = b.data[0],
+		ya = a.data[1],
+		yb = b.data[1],
+		za = a.data[2],
+		zb = b.data[2];
+	c.data[0] = ya * zb - yb * za;
 	c.data[1] = -xa * zb + xb * za;
-	c.data[2] =  xa * yb - xb * ya;
+	c.data[2] = xa * yb - xb * ya;
 	return c;
 }
 
@@ -557,20 +554,20 @@ void observer(float px, float py, float pz, float cx, float cy, float cz, float 
 	matrix Teye = matrix_translation(-px, -py, -pz);
 	printf("Eye translation matrix:\n");
 	print_matrix(Teye);
-	
+
 	//Eye tilt matrix
 	eyetilt = matrix_rotation(-tilt, Z_AXIS);	//tilt here should be opposite
 	printf("Eye tilt matrix:\n");
 	print_matrix(eyetilt);
 
 	//GRM
-	vec4 view_vector(cx-px, cy-py, cz-pz, 0);
+	vec4 view_vector(cx - px, cy - py, cz - pz, 0);
 	vec4 v3 = normalize(view_vector);
-	vec4 v1 = cross_product(vec4(0,1,0,0), v3);
-		 v1 = normalize(v1);
+	vec4 v1 = cross_product(vec4(0, 1, 0, 0), v3);
+	v1 = normalize(v1);
 	vec4 v2 = cross_product(v3, v1);
-		 v2 = normalize(v2);
-	GRM = matrix(v1,v2,v3,vec4(0,0,0,1));
+	v2 = normalize(v2);
+	GRM = matrix(v1, v2, v3, vec4(0, 0, 0, 1));
 	printf("GRM:\n");
 	print_matrix(GRM);
 
@@ -589,10 +586,10 @@ void observer(float px, float py, float pz, float cx, float cy, float cz, float 
 	PM.data[3][3] = 0;
 }
 
-void viewport(float vl,float vr,float vb,float vt)
+void viewport(float vl, float vr, float vb, float vt)
 {
 	//AR
-	AR = ratio(delta(vl, vr), delta(vb,vt));
+	AR = ratio(delta(vl, vr), delta(vb, vt));
 	PM.data[1][1] = AR;						//Reassignment for AR value for preventing  
 	print_matrix(PM);						//the misorder of command(observer and viewport)
 
@@ -601,8 +598,8 @@ void viewport(float vl,float vr,float vb,float vt)
 	matrix T1, S2, T3;
 	T1 = matrix_translation(1, 1, 0);
 	S2 = matrix_scaling(ratio(delta(vl, vr), delta(-1, 1)),
-						ratio(delta(vb, vt), delta(-1, 1)), 
-						1);
+		ratio(delta(vb, vt), delta(-1, 1)),
+		1);
 	T3 = matrix_translation(vl, vb, 0);
 	WVM = matrix_mul(T3, matrix_mul(S2, T1));
 	cout << "WVM" << endl;
@@ -616,44 +613,44 @@ void display()
 	final = matrix_mul(WVM, matrix_mul(PM, EM));
 
 
-	for(int i=0; i<num_object; i++)	//For every object
+	for (int i = 0; i<num_object; i++)	//For every object
 	{
 		ASCModel c = cube[i];
 		int face_num = c.num_face;
-		for(int j=0; j<face_num; j++)	// For every face of the object
+		for (int j = 0; j<face_num; j++)	// For every face of the object
 		{
 			// Calculate the first point
 			int vec_num = c.face[j][1];
-			vec4 previous(c.vertex[vec_num-1][0],
-						  c.vertex[vec_num-1][1],
-						  c.vertex[vec_num-1][2]);
+			vec4 previous(c.vertex[vec_num - 1][0],
+				c.vertex[vec_num - 1][1],
+				c.vertex[vec_num - 1][2]);
 			vec4 fp;
 			previous = mat_vec_mul(final, previous);
-			fp = previous;	
-			for(int k=2; k<=c.face[j][0]; k++)	// For the rest points of the face
+			fp = previous;
+			for (int k = 2; k <= c.face[j][0]; k++)	// For the rest points of the face
 			{
 				vec_num = c.face[j][k];
-				vec4 cur(c.vertex[vec_num-1][0],
-						  c.vertex[vec_num-1][1],
-						  c.vertex[vec_num-1][2]);
-				cur= mat_vec_mul(final, cur);
+				vec4 cur(c.vertex[vec_num - 1][0],
+					c.vertex[vec_num - 1][1],
+					c.vertex[vec_num - 1][2]);
+				cur = mat_vec_mul(final, cur);
 				//Connect the line of two point(current point and previous one)
-				drawLine(previous.data[0]/previous.data[3],
-						 	  cur.data[0]/	   cur.data[3],
-						 previous.data[1]/previous.data[3],
-						 	  cur.data[1]/	   cur.data[3]);
+				drawLine(previous.data[0] / previous.data[3],
+					cur.data[0] / cur.data[3],
+					previous.data[1] / previous.data[3],
+					cur.data[1] / cur.data[3]);
 				//If it's last one, connect back to the first point
 				if (k == c.face[j][0])
 				{
 					previous = fp;
 					drawLine(previous.data[0] / previous.data[3],
-								  cur.data[0] / 	 cur.data[3],
-						 	 previous.data[1] / previous.data[3],
-						 		  cur.data[1] / 	 cur.data[3]);
+						cur.data[0] / cur.data[3],
+						previous.data[1] / previous.data[3],
+						cur.data[1] / cur.data[3]);
 				}
 				//Update previous
 				previous = cur;
 			}
 		}
-	}	
+	}
 }
