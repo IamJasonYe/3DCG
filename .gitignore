@@ -212,6 +212,9 @@ ClientBin/
 *.pfx
 *.publishsettings
 node_modules/
+*.filters
+*.sublime-workspace
+*.vcxproj
 orleans.codegen.cs
 
 # RIA/Silverlight projects
@@ -245,4 +248,8 @@ FakesAssemblies/
 
 # Visual Studio 6 workspace options file
 *.opt
+
+# Specific File
+*/3DCG_Hw1/
+*/3DCG_Hw/
 
