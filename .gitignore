@@ -8,6 +8,7 @@
 *.filters
 *.sdf
 *.opensdf
+*.in
 
 #files
 /3DCG_Hw/*
