@@ -175,6 +175,7 @@ void main(int ac, char** av)
 	height = winSizeY;
 	cout << "Window size: " << width << " * " << height << endl;
 	identity_matrix(model_matrix);
+	viewport(0,width,0,height);
 
 	// initialize OpenGL utility toolkit (glut)
 	glutInit(&ac, av);
@@ -278,7 +279,7 @@ void ReadInput(bool& IsExit)
 
 	float sx, sy, sz, degreeX, degreeY, degreeZ,
 		tx, ty, tz,
-		vl, vr, vb, vt,
+		// vl, vr, vb, vt,
 		px, py, pz, cx, cy, cz, tilt, znear, zfar, hfov;
 	string command, comment, filename;
 	fin >> command;
@@ -301,12 +302,12 @@ void ReadInput(bool& IsExit)
 		cout << "Created ojbect!" << endl;
 		num_object++;
 	}
-	else if (command == "viewport")
-	{
-		fin >> vl >> vr >> vb >> vt;
-		cout << "( " << vl << "," << vr << "," << vb << "," << vt << " )" << endl;
-		viewport(vl, vr, vb, vt);
-	}
+	// else if (command == "viewport")
+	// {
+	// 	fin >> vl >> vr >> vb >> vt;
+	// 	cout << "( " << vl << "," << vr << "," << vb << "," << vt << " )" << endl;
+	// 	viewport(vl, vr, vb, vt);
+	// }
 	else if (command == "observer")
 	{
 		fin >> px >> py >> pz >> cx >> cy >> cz >> tilt >> znear >> zfar >> hfov;
@@ -615,8 +616,8 @@ void viewport(float vl, float vr, float vb, float vt)
 		1);
 	T3 = matrix_translation(vl, vb, 0);
 	WVM = matrix_mul(T3, matrix_mul(S2, T1));
-	cout << "WVM" << endl;
-	print_matrix(WVM);
+	// cout << "WVM" << endl;
+	// print_matrix(WVM);
 }
 
 void display()
