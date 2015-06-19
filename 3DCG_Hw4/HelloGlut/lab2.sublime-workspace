@@ -1,0 +1,1036 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"db",
+				"dbScanCode"
+			],
+			[
+				"TI",
+				"TIMER1PRD"
+			],
+			[
+				"p",
+				"p"
+			],
+			[
+				"F_",
+				"F_OUT_S_IN"
+			],
+			[
+				"AL",
+				"ALL_OUT"
+			],
+			[
+				"f_",
+				"f_s_case_status"
+			],
+			[
+				"fs",
+				"f_s_case_status"
+			],
+			[
+				"point_",
+				"point_status"
+			],
+			[
+				"fi",
+				"first_point"
+			],
+			[
+				"l",
+				"l_or_g"
+			],
+			[
+				"fir",
+				"first"
+			],
+			[
+				"vie",
+				"view_clipping"
+			],
+			[
+				"curr",
+				"cur_matrix"
+			],
+			[
+				"clipp",
+				"clipping_data"
+			],
+			[
+				"cli",
+				"clipping_data"
+			],
+			[
+				"matr",
+				"matrix"
+			],
+			[
+				"mat",
+				"mat_vec_mul"
+			],
+			[
+				"mul",
+				"martix_mul"
+			],
+			[
+				"matrix_",
+				"matrix_scaling"
+			],
+			[
+				"vy",
+				"vyt"
+			],
+			[
+				"tra",
+				"triangle_data"
+			],
+			[
+				"ne",
+				"next"
+			],
+			[
+				"cur",
+				"cur_point"
+			],
+			[
+				"vc",
+				"vec3"
+			],
+			[
+				"sq",
+				"sqaure_or_triangle"
+			],
+			[
+				"cal",
+				"calculate_point"
+			],
+			[
+				"squre",
+				"square_data"
+			],
+			[
+				"point",
+				"point_data"
+			],
+			[
+				"MAX",
+				"MAX_NUM_TRIANGLE"
+			],
+			[
+				"num_",
+				"num_square"
+			],
+			[
+				"num",
+				"num_triangel"
+			],
+			[
+				"ma",
+				"matrix"
+			],
+			[
+				"vec3",
+				"vec3_data"
+			],
+			[
+				"vec",
+				"vec3"
+			],
+			[
+				"iden",
+				"identity_matrix"
+			],
+			[
+				"print",
+				"print_matrix"
+			],
+			[
+				"prin",
+				"print_matrix"
+			],
+			[
+				"tr",
+				"travel"
+			],
+			[
+				"i",
+				"i"
+			],
+			[
+				"nam",
+				"namespace"
+			],
+			[
+				"poly",
+				"polygon_start"
+			],
+			[
+				"lorp",
+				"L_or_P"
+			],
+			[
+				"drawL",
+				"drawLineOrPolygon"
+			],
+			[
+				"dral",
+				"drawLineOrPolygon"
+			],
+			[
+				"line",
+				"line_start"
+			],
+			[
+				"a",
+				"a"
+			],
+			[
+				"A",
+				"A"
+			],
+			[
+				"b",
+				"b"
+			],
+			[
+				"tmp",
+				"tmp"
+			],
+			[
+				"n",
+				"naive"
+			],
+			[
+				"cent",
+				"center_y"
+			],
+			[
+				"first",
+				"firsty"
+			],
+			[
+				"GLUT_",
+				"GLUT_UP"
+			],
+			[
+				"down",
+				"GLUT_DOWN"
+			],
+			[
+				"glutl",
+				"GLUT_LEFT_BUTTON"
+			],
+			[
+				"line_s",
+				"line_start"
+			],
+			[
+				"f",
+				"finding"
+			],
+			[
+				"x",
+				"x"
+			],
+			[
+				"err",
+				"errorB"
+			],
+			[
+				"fp",
+				"fprintf"
+			],
+			[
+				"tol",
+				"tol"
+			],
+			[
+				"funC",
+				"funcC"
+			],
+			[
+				"win",
+				"win"
+			],
+			[
+				"primel",
+				"prime_list"
+			],
+			[
+				"test",
+				"test_num"
+			],
+			[
+				"te",
+				"test_num"
+			],
+			[
+				"true",
+				"true"
+			],
+			[
+				"end",
+				"endmodule"
+			],
+			[
+				"dump",
+				"dumpvars"
+			],
+			[
+				"cmo",
+				"cmosnand3"
+			],
+			[
+				"dat",
+				"data_in"
+			],
+			[
+				"data",
+				"data_out"
+			],
+			[
+				"d",
+				"data_out"
+			],
+			[
+				"da",
+				"data_in"
+			],
+			[
+				"els",
+				"else	else"
+			],
+			[
+				"alwa",
+				"always"
+			],
+			[
+				"t",
+				"test_data_num"
+			],
+			[
+				"NA",
+				"NA"
+			],
+			[
+				"int",
+				"INT_MAX"
+			],
+			[
+				"IN",
+				"INT_MAX"
+			],
+			[
+				"len",
+				"length"
+			],
+			[
+				"br",
+				"brackets"
+			],
+			[
+				"ALU",
+				"ALUo"
+			],
+			[
+				"Aluo",
+				"ALUo_out"
+			],
+			[
+				"reg",
+				"reg_C"
+			],
+			[
+				"dad",
+				"d_datain"
+			],
+			[
+				"out",
+				"out_key"
+			],
+			[
+				"state",
+				"next_state"
+			],
+			[
+				"pos",
+				"posedge"
+			],
+			[
+				"al",
+				"always"
+			],
+			[
+				"sl",
+				"select_y"
+			],
+			[
+				"sele",
+				"select_y_out"
+			],
+			[
+				"bit",
+				"bit_ctr"
+			],
+			[
+				"w",
+				"w_en"
+			],
+			[
+				"rst",
+				"rst"
+			],
+			[
+				"alw",
+				"always	always"
+			],
+			[
+				"st",
+				"start_bit"
+			],
+			[
+				"clcok",
+				"clock40"
+			],
+			[
+				"vs",
+				"vs"
+			],
+			[
+				"s",
+				"select_y"
+			],
+			[
+				"e",
+				"enable"
+			],
+			[
+				"pCPU",
+				"pCPU_with_mem"
+			],
+			[
+				"dw",
+				"d_we"
+			],
+			[
+				"dd",
+				"d_datain"
+			],
+			[
+				"add",
+				"addr"
+			],
+			[
+				"id",
+				"i_addr"
+			],
+			[
+				"pcpu",
+				"pcpu"
+			],
+			[
+				"re",
+				"reg_A"
+			],
+			[
+				"addi",
+				"ADDI"
+			],
+			[
+				"sub",
+				"SUBC"
+			],
+			[
+				"i_",
+				"i_datain"
+			],
+			[
+				"wbi",
+				"wb_ir"
+			],
+			[
+				"mm",
+				"mem_ir"
+			],
+			[
+				"idi",
+				"id_ir"
+			],
+			[
+				"d_d",
+				"d_datain"
+			],
+			[
+				"b0000_",
+				"b0000_0000_0000_0000"
+			],
+			[
+				"ALu",
+				"ALUo"
+			],
+			[
+				"S",
+				"STORE"
+			],
+			[
+				"pc",
+				"pc_out"
+			],
+			[
+				"wire",
+				"wire"
+			],
+			[
+				"zf",
+				"zf_out"
+			],
+			[
+				"nf",
+				"nf"
+			],
+			[
+				"cf",
+				"cf_out"
+			],
+			[
+				"sm",
+				"smdr1"
+			],
+			[
+				"smd",
+				"smdr1"
+			],
+			[
+				"sta",
+				"state"
+			],
+			[
+				"sd",
+				"smdr"
+			],
+			[
+				"gr2",
+				"gr2_in"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 400.0,
+		"last_filter": "mat",
+		"selected_items":
+		[
+			[
+				"mat",
+				"Set Syntax: MATLAB"
+			],
+			[
+				"c++",
+				"Set Syntax: C++"
+			],
+			[
+				"matl",
+				"Set Syntax: MATLAB"
+			],
+			[
+				"make",
+				"Set Syntax: Makefile"
+			],
+			[
+				"m",
+				"Set Syntax: Makefile"
+			],
+			[
+				"matlab",
+				"Set Syntax: MATLAB"
+			],
+			[
+				"set ma",
+				"Set Syntax: MATLAB"
+			],
+			[
+				"set c++",
+				"Set Syntax: C++"
+			],
+			[
+				"veril",
+				"Set Syntax: Verilog"
+			],
+			[
+				"veri",
+				"Set Syntax: Verilog"
+			],
+			[
+				"set syntax c++",
+				"Set Syntax: C++"
+			],
+			[
+				"Package Control: ",
+				"Package Control: List Packages"
+			],
+			[
+				"set sy c++",
+				"Set Syntax: C++"
+			],
+			[
+				"pack",
+				"Package Control: Install Package"
+			],
+			[
+				"insp",
+				"Package Control: Install Package"
+			],
+			[
+				"ink",
+				"Package Control: Install Package"
+			],
+			[
+				"insal",
+				"Package Control: Install Package"
+			],
+			[
+				"pki",
+				"Package Control: Install Package"
+			],
+			[
+				"paki",
+				"Package Control: Install Package"
+			],
+			[
+				"insk",
+				"Package Control: Install Package"
+			],
+			[
+				"package",
+				"Package Control: Install Package"
+			],
+			[
+				"c+",
+				"Set Syntax: C++"
+			],
+			[
+				"instl",
+				"Package Control: Install Package"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: in",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: inta",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 408.0
+	},
+	"console":
+	{
+		"height": 126.0,
+		"history":
+		[
+			"import urllib.request,os,sys; exec(\"if sys.version_info < (3,) or os.name != 'nt': raise OSError('This code is for Windows ST3 only!')\"); pr='Preferences.sublime-settings'; ip='ignored_packages'; n='Package Control'; s=sublime.load_settings(pr); ig=s.get(ip); ig.append(n); s.set(ip,ig); sublime.save_settings('Preferences.sublime-settings'); pf=n+'.sublime-package'; urllib.request.install_opener(urllib.request.build_opener(urllib.request.ProxyHandler())); by=urllib.request.urlopen('https://packagecontrol.io/'+pf.replace(' ','%20')).read(); open(os.path.join(sublime.installed_packages_path(),pf),'wb').write(by); ig.remove(n); s.set(ip,ig); sublime.save_settings(pr); print('Package Control: 3.0.0 upgrade successful!')",
+			" import urllib.request,os,sys; exec(\"if sys.version_info < (3,) or os.name != 'nt': raise OSError('This code is for Windows ST3 only!')\"); pr='Preferences.sublime-settings'; ip='ignored_packages'; n='Package Control'; s=sublime.load_settings(pr); ig=s.get(ip); ig.append(n); s.set(ip,ig); sublime.save_settings('Preferences.sublime-settings'); pf=n+'.sublime-package'; urllib.request.install_opener(urllib.request.build_opener(urllib.request.ProxyHandler())); by=urllib.request.urlopen('https://packagecontrol.io/'+pf.replace(' ','%20')).read(); open(os.path.join(sublime.installed_packages_path(),pf),'wb').write(by); ig.remove(n); s.set(ip,ig); sublime.save_settings(pr); print('Package Control: 3.0.0 upgrade successful!')",
+			"import urllib.request,os; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); open(os.path.join(ipp, pf), 'wb').write(urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ','%20')).read())"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/s数字信号处理/实验课/report/week7/task2head.h",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/s数字信号处理/实验课/report/week7/task2.c",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/s数字信号处理/实验课/report/week7/task1.c",
+		"/F/0414/task2.c",
+		"/F/0414/task2head.h",
+		"/C/Users/_Ye/AppData/Local/Temp/HZ$D.141.1111/HZ$D.141.1112/p3/gaussseidel.m",
+		"/C/Users/_Ye/AppData/Local/Temp/HZ$D.141.1111/HZ$D.141.1114/p3/p2_5_3.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/s数值分析/作业/week7/p3/p2_5_3.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/s数值分析/作业/week7/p2_5_3.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/s数值分析/作业/week7/jacobi.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/s数值分析/作业/week7/p1/solveSparseSystem.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/s数值分析/作业/week7/gaussseidel.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/s数值分析/作业/week7/p3/gaussseidel.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/s数值分析/作业/week7/solveSparseSystem.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/s数值分析/matlab_coding/数值分析书上代码/sparsesetup.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/s数值分析/作业/week7/sparsesetup.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/s数值分析/作业/week7/bisect.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/s数值分析/作业/week2/bisect.m",
+		"/E/GitHub/3DCG/3DCG_Hw1/HelloGlut/lab2.cpp",
+		"/C/Users/_Ye/Desktop/lab1/factorial.asm",
+		"/C/Users/_Ye/Desktop/lab1/fib.asm",
+		"/C/Users/_Ye/Desktop/lab1/findmax.asm",
+		"/C/Users/_Ye/Desktop/lab1/add.asm",
+		"/C/Users/_Ye/Desktop/lab1/helloworld.asm",
+		"/E/GitHub/3DCG/3DCG_Hw/HelloGlut/lab1.cpp",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/j计组资料/实验/移动信工_计算机组成原理_第一次实验/findmax.asm",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/j计组资料/实验/移动信工_计算机组成原理_第一次实验/add.asm",
+		"/C/Users/_Ye/Desktop/glut/3DCG_Hw2/lab2.cpp",
+		"/C/Users/_Ye/Desktop/helloworld.cpp",
+		"/C/Users/_Ye/Desktop/glut/3DCG_Hw2/hw2F.in",
+		"/C/Users/_Ye/Desktop/glut/3DCG_Hw2/hw2E.in",
+		"/C/Users/_Ye/Desktop/glut/3DCG_Hw2/hw2D.in",
+		"/C/Users/_Ye/Desktop/glut/3DCG_Hw2/hw2C.in",
+		"/C/Users/_Ye/Desktop/glut/3DCG_Hw2/hw2B.in",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/t通信原理/实验课/week6/lab2.m",
+		"/C/Users/_Ye/Desktop/glut/3DCG_Hw2/hw2A.in",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/t通信原理/实验课/week6/lab1.m",
+		"/C/Users/_Ye/Desktop/mylab1.cpp",
+		"/C/Users/_Ye/Desktop/lab1.cpp",
+		"/C/Users/_Ye/Desktop/test.cpp",
+		"/C/Users/_Ye/Desktop/bisect.m",
+		"/C/Users/_Ye/Desktop/lab2.cpp",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/通信原理/实验课/week6/lab1.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/通信原理/实验课/week6/lab3.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数字信号处理/实验课/report/week5/AD.c",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/通信原理/实验课/week6/lab2.m",
+		"/E/GitHub/3DCG/3DCG_Hw1/Debug/in.txt",
+		"/E/GitHub/cpp/2015/March/0412/test.cpp",
+		"/E/GitHub/cpp/2015/March/0412/d.cpp",
+		"/E/GitHub/cpp/2015/March/0412/d.ccpp",
+		"/E/GitHub/cpp/2015/March/0412/c.cpp",
+		"/E/GitHub/3DCG/3DCG_Hw1/HelloGlut/stdafx.cpp",
+		"/E/GitHub/3DCG/3DCG_Hw1/HelloGlut/stdafx.h",
+		"/E/GitHub/3DCG/3DCG_Hw1/HelloGlut/lab1.cpp",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数字信号处理/实验课/report/week5/ad.c",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数字信号处理/实验课/report/week5/da.c",
+		"/E/GitHub/playaplay/2015/April/0406/report.txt",
+		"/G/Vim/_vimrc",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数字信号处理/实验课/report/week5/ad.txt",
+		"/E/Upan/ad.txt",
+		"/C/Users/_Ye/AppData/Local/Temp/HZ$D.112.4793/HZ$D.112.4794/说明.txt",
+		"/E/GitHub/3DCG/3DCG_Hw/HelloGlut/reame.txt",
+		"/C/Users/_Ye/AppData/Local/Temp/HZ$D.005.3331/HZ$D.005.3337/readme.txt",
+		"/C/Users/_Ye/AppData/Local/Temp/HZ$D.005.3331/HZ$D.005.3339/说明.txt",
+		"/E/GitHub/3DCG/3DCG_Hw/Debug/readme.txt",
+		"/C/Users/_Ye/AppData/Local/Temp/HZ$D.259.1837/HZ$D.259.1838/readme.txt",
+		"/C/Users/_Ye/Desktop/glut/3DCG_Hw2/hw2.in",
+		"/C/Users/_Ye/Desktop/glut/3DCG_Hw2/glut.h",
+		"/E/GitHub/cpp/2015/March/0322/1002. Huffman coding.cpp",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数字信号处理/实验课/report/week4/main.c",
+		"/E/GitHub/3DCG/3DCG_Hw/HelloGlut/circle.cpp",
+		"/E/GitHub/3DCG/3DCG_Hw/HelloGlut/circle.h",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/作业/week4/p2_2_1.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/作业/week4/p2_1_2.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/作业/week4/p_2_1_2.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/作业/week4/naive.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/作业/week4/LUfac.m",
+		"/C/Users/_Ye/Desktop/glut/HelloGlut/HelloGlut/HelloGlut.cpp",
+		"/E/GitHub/playaplay/2015/March/0325/src/permutation.cpp",
+		"/E/GitHub/playaplay/2015/March/0324/src/13289Game.cpp",
+		"/E/GitHub/3DCG/HelloGlut/HelloGlut/lab1.cpp",
+		"/E/GitHub/3DCG/3DCG_Hw1/glut.h",
+		"/E/GitHub/3DCG/3DCG_Hw1/lab1.cpp",
+		"/C/Users/_Ye/Desktop/glut/3DCG_Hw1/lab1.cpp",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数字信号处理/实验课/ppt/week3/走马灯+创意设计.c",
+		"/E/GitHub/playaplay/2015/March/0323/src/1931cardgame.cpp",
+		"/E/GitHub/playaplay/2015/March/task3.txt",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/作业/week2/p0_1_2.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/作业/week2/p1_1_7.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/作业/说明/func.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/作业/week3/secant.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/作业/week3/p1_5_1.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/作业/week3/newton.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/作业/week3/p1_4_13.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/作业/week3/p1_2_2.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/matlab_coding/数值分析书上代码/newtdd.m",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/作业/week3/fpi.m",
+		"/E/GitHub/cpp/2015/March/testfib.cpp",
+		"/E/GitHub/cpp/2015/March/fib.cpp",
+		"/E/GitHub/cpp/2015/March/fib.h",
+		"/E/GitHub/playaplay/STL_intro.txt",
+		"/E/GitHub/cpp/2015/March/fib0.cpp",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/作业/week3/fpi_tol.m",
+		"/E/GitHub/playaplay/2015/March/0319/src/1200stick.cpp",
+		"/e/GitHub/playaplay/2015/March/task3.txt",
+		"/E/GitHub/cpp/2015/March/1305. Whos Winner.cpp",
+		"/E/快盘/jasonradcliffeye@gmail.com/大二/下学期/数值分析/matlab_coding/数值分析书上代码/fpi.m",
+		"/E/GitHub/cpp/2015/March/13290. Play with Strings.cpp",
+		"/E/GitHub/cpp/2015/March/1305. Who’s Winner.cpp",
+		"/E/GitHub/cpp/2015/March/test.py",
+		"/E/cpp_workplace/2015/0317/1001. Fibonacci 2.cpp",
+		"/E/GitHub/playaplay/2015/March/0317/tips.txt",
+		"/E/GitHub/playaplay/2015/March/0318/src/testfile.cpp",
+		"/E/GitHub/playaplay/2015/March/0318/src/sort.h",
+		"/E/GitHub/playaplay/2015/March/0318/src/cmp.cpp",
+		"/E/GitHub/playaplay/2015/March/0318/src/insert_sort.cpp",
+		"/e/GitHub/playaplay/2015/March/0317/src/binarySearch.cpp",
+		"/e/GitHub/playaplay/2015/March/0315/src/1381.cpp",
+		"/e/GitHub/playaplay/2015/March/task2.txt",
+		"/E/GitHub/playaplay/2015/March/0316/src/date.cpp",
+		"/E/快盘/jasonradcliffeye@gmail.com/Programming/2014/0228/1000. 日期计算问题.cpp",
+		"/E/快盘/jasonradcliffeye@gmail.com/Programming/2014/0104/1003. 插入与删除.cpp",
+		"/E/cpp_workplace/1048/1048.cpp",
+		"/E/GitHub/playaplay/2015/March/0313/tips/test.py",
+		"/e/GitHub/playaplay/2015/March/0313/tips/tips.txt",
+		"/E/GitHub/playaplay/2015/March/0313/report.txt",
+		"/E/GitHub/playaplay/2015/March/0313/src/main.cpp",
+		"/E/GitHub/playaplay/2015/March/0313/src/prime.cpp"
+	],
+	"find":
+	{
+		"height": 28.0
+	},
+	"find_in_files":
+	{
+		"height": 121.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"u",
+			"--;\n",
+			"r",
+			"martix_mul",
+			"End",
+			"	\n",
+			"cur_matrix",
+			"triangle",
+			"calculate_points",
+			"calculate",
+			"cal",
+			"calculate_point",
+			";\n",
+			"drawDot",
+			"draw_dot",
+			"						\n",
+			"width",
+			"();\n",
+			"bool",
+			"redraw",
+			"];\n",
+			"cb",
+			");\n",
+			"state",
+			"B2",
+			" B2",
+			" ",
+			"B2",
+			"B3",
+			"A2",
+			"B3",
+			"B2",
+			"fpi",
+			"a2",
+			"a1",
+			"a0",
+			"y",
+			"inv_next",
+			"data_next",
+			"a",
+			"1000000",
+			"opencv",
+			"]);\n",
+			");\n",
+			"()",
+			"j",
+			"=)",
+			"Node",
+			"p",
+			"INT_mAX",
+			"					\n",
+			"map",
+			"ALUo",
+			"gr",
+			"cin",
+			";\n",
+			"(\n",
+			"gr",
+			"start",
+			"}",
+			",",
+			"`",
+			"data",
+			"00",
+			"FF",
+			"//",
+			"BIT",
+			"bit",
+			"{",
+			"//",
+			",  ",
+			"00",
+			"FF",
+			"vgablue",
+			"vgagreen",
+			"vgAred",
+			"]",
+			"<",
+			",",
+			"0",
+			"1",
+			"//",
+			"1",
+			"FF",
+			"0",
+			",,",
+			"1",
+			"0",
+			",,",
+			"1",
+			"0",
+			"pcpu",
+			"};\n",
+			"input wire",
+			"i_datain",
+			"begin",
+			"end",
+			"begin",
+			"end",
+			";",
+			"in",
+			"input",
+			"_",
+			"=",
+			"return",
+			"digit",
+			"void",
+			")\n",
+			" \n",
+			"rc",
+			"lc",
+			"#",
+			"#include <iostream>\n#include <bitset>\nusing namespace std;\n\nint main()\n{\n	int N;\n	cin >> N;\n	for(int i=1; i<=N; i++)\n	{\n		string x,y;\n		cin >> x >> y;\n		bitset<81> a(x);\n		bitset<81> b(y);\n		bitset<81> c,result;\n		result = a ^ b;\n		//cout << result << endl;\n		c = a & b;\n		while(c != 0)\n		{\n			c <<= 1;\n			bitset<81> tmp = result;\n			result ^= c;\n			c &= tmp;\n		}\n		cout << i << \" \";\n		bool first(true);\n		for(int i=result.size()-1; i>=0; i--)\n		{\n			if(result[i] == 0 && first)\n				continue;\n			else\n			{\n				first = false;\n				cout << result[i];\n			}\n		}\n\n		cout << endl;\n	}\n\n}",
+			"result",
+			"list",
+			"dye",
+			"num",
+			"val",
+			"++;",
+			"rear",
+			"node",
+			";\n",
+			"a",
+			" 17                                                        O  O     O  O                                                                                 \n 18                                                        O  O     O  O                                                                                 \n 19                                                           O     O                                                                                    \n 20                                                     O     O     O     O                                                                              \n 21                                                     O     O     O     O                                                                              \n 22                                                     O  O           O  O   ",
+			"else"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 28.0
+	},
+	"input":
+	{
+		"height": 44.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "lab2.sublime-project",
+	"replace":
+	{
+		"height": 52.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 119.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

@@ -1,0 +1,11 @@
+# load a teapot
+object teapot.asc
+
+# set viewport
+viewport 100 400 100 400
+
+# Eye (0,0,10)  Look at (0,0,0)
+observer 0 0 10  0 0 0  0 1 100 45
+display
+end
+
