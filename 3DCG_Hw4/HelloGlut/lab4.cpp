@@ -25,6 +25,8 @@ WHITE = 2;
 
 struct ASCModel
 {
+	float r,g,b,kd,ks;
+	int n;
 	int   num_vertex;
 	int   num_face;
 	float vertex[MAX_ASC_MODEL_VERTEX][3];
@@ -131,8 +133,10 @@ point_data* cur_point;
 matrix model_matrix;
 matrix WVM, EM, PM, GRM, eyetilt;
 ASCModel cube[MAX_NUM_OBJECT];
+//Ambient light coefficient
 float Ka;
-float BGr,BGg,BGb;
+//background color:R,G,B
+float bgr,bgg,bgb; 
 //Obeject
 void create_object();
 
@@ -140,7 +144,7 @@ void create_object();
 float deg2rad(float degree);
 float ratio(float a, float b);
 float delta(float a, float b);
-void readModel(string filename);
+void readModel(string filename, float r, float g, float b, float kd, float ks, int n);
 ifstream fin;
 
 void main(int ac, char** av)
@@ -281,7 +285,9 @@ void ReadInput(bool& IsExit)
 	float sx, sy, sz, degreeX, degreeY, degreeZ,
 		tx, ty, tz,
 		// vl, vr, vb, vt,
-		px, py, pz, cx, cy, cz, tilt, znear, zfar, hfov;
+		px, py, pz, cx, cy, cz, tilt, znear, zfar, hfov,
+		r,g,b,kd,ks;
+	int n;
 	string command, comment, filename;
 	fin >> command;
 	cout << "== Command: " << command;
@@ -297,7 +303,8 @@ void ReadInput(bool& IsExit)
 	{
 		fin >> filename;
 		cout << "[ " << filename << " ]" << endl;
-		readModel(filename);
+		fin >> r >> g >> b >> kd >> ks >> n;
+		readModel(filename,r,g,b,kd,ks,n);
 		cout << "Read object sucessfully!" << endl;
 		create_object();
 		cout << "Created ojbect!" << endl;
@@ -376,8 +383,8 @@ void ReadInput(bool& IsExit)
 	}
 	else if(command == "background")
 	{
-		fin >> BGr >> BGg >> BGb;
-		cout << "Background color: " << BGr << " " << BGg << " " << BGb << endl;
+		fin >> bgr >> bgg >> bgb;
+		cout << "Background color: " << bgr << " " << bgg << " " << bgb << endl;
 	}
 }
 
@@ -503,7 +510,7 @@ float delta(float a, float b)
 }
 
 //Read the model datas
-void readModel(string filename)
+void readModel(string filename, float r, float g, float b, float kd, float ks, int n)
 {
 	ifstream modelin(filename);
 	// get number of vertex/face first
