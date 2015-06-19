@@ -132,6 +132,7 @@ matrix model_matrix;
 matrix WVM, EM, PM, GRM, eyetilt;
 ASCModel cube[MAX_NUM_OBJECT];
 float Ka;
+float BGr,BGg,BGb;
 //Obeject
 void create_object();
 
@@ -372,6 +373,11 @@ void ReadInput(bool& IsExit)
 	{
 		fin >> Ka;
 		cout << "Ambient Ka:" << fixed << setprecision(2) << Ka << endl << endl;
+	}
+	else if(command == "background")
+	{
+		fin >> BGr >> BGg >> BGb;
+		cout << "Background color: " << BGr << " " << BGg << " " << BGb << endl;
 	}
 }
 
