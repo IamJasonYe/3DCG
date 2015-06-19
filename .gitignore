@@ -211,6 +211,7 @@ ClientBin/
 *.dbproj.schemaview
 *.pfx
 *.publishsettings
+HelloGlut.log
 node_modules/
 *.filters
 *.sublime-workspace
@@ -250,6 +251,6 @@ FakesAssemblies/
 *.opt
 
 # Specific File
-*/3DCG_Hw1/
-*/3DCG_Hw/
+3DCG_Hw1/
+3DCG_Hw/
 
