@@ -131,7 +131,7 @@ point_data* cur_point;
 matrix model_matrix;
 matrix WVM, EM, PM, GRM, eyetilt;
 ASCModel cube[MAX_NUM_OBJECT];
-
+float Ka;
 //Obeject
 void create_object();
 
@@ -367,6 +367,11 @@ void ReadInput(bool& IsExit)
 		getline(fin, comment);
 		cout << comment << endl;
 		cout << endl;
+	}
+	else if(command == "ambient")
+	{
+		fin >> Ka;
+		cout << "Ambient Ka:" << fixed << setprecision(2) << Ka << endl << endl;
 	}
 }
 
