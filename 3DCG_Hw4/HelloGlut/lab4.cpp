@@ -147,20 +147,33 @@ void main(int ac, char** av)
 	int winSizeX, winSizeY;
 	string name;
 	// initial();
+	fin.open(av[1], std::ifstream::in);
 	if (ac == 3) {
 		winSizeX = atoi(av[1]);
 		winSizeY = atoi(av[2]);
 		//		cout<<"Done";
+	}
+	else if(ac == 2)
+	{
+		if(fin.fail())
+		{
+			cout << "Read in failed!" << endl;
+			exit(0);
+		}
+		else
+		{
+			fin >> winSizeX >> winSizeY;
+		}
 	}
 	else { // default window size
 		winSizeX = 800;
 		winSizeY = 600;
 	}
 	cout << av[1] << endl;
-	fin.open(av[1], std::ifstream::in);
 
 	width = winSizeX;
 	height = winSizeY;
+	cout << "Window size: " << width << " * " << height << endl;
 	identity_matrix(model_matrix);
 
 	// initialize OpenGL utility toolkit (glut)
