@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "drawline.h"
 #include <iostream>
 #include <iomanip>
@@ -13,6 +13,7 @@
 #define  MAX_NUM_OBJECT 10
 #define  MAX_ASC_MODEL_VERTEX 1980	//Adjust following by teapot.asc
 #define  MAX_ASC_MODEL_FACE   3760	//Adjust following by teapot.asc
+#define  MAX_NUM_LIGHT 4
 using namespace std;
 
 const int X_AXIS = 0,
@@ -23,6 +24,20 @@ const int RED = 0,
 BLUE = 1,
 WHITE = 2;
 
+struct Light{
+	int id;
+	float ip,x,y,z;
+	Light(){}
+	Light(int id_, float ip_, float x_, float y_, float z_)
+	{
+		id = id_;
+		ip = ip_;
+		x = x_;
+		y = y_;
+		z = z_;
+	}
+};
+
 struct ASCModel
 {
 	float r,g,b,kd,ks;
@@ -31,6 +46,16 @@ struct ASCModel
 	int   num_face;
 	float vertex[MAX_ASC_MODEL_VERTEX][3];
 	int   face[MAX_ASC_MODEL_FACE][5];
+	ASCModel(){}
+	ASCModel(float r_, float g_, float b_, float kd_, float ks_, int n_)
+	{
+		r = r_;
+		g = g_;
+		b = b_;
+		kd = kd_;
+		ks = ks_;
+		n = n_;
+	}
 };
 
 struct vec4
@@ -127,12 +152,14 @@ vec4 normalize(vec4 v);
 //variables decalration
 int height, width;
 int num_object = 0;
+int num_light = 0;
 bool first_endpoint = true;
 float AR;
 point_data* cur_point;
 matrix model_matrix;
 matrix WVM, EM, PM, GRM, eyetilt;
 ASCModel cube[MAX_NUM_OBJECT];
+Light light[MAX_NUM_LIGHT];
 //Ambient light coefficient
 float Ka;
 //background color:R,G,B
@@ -286,7 +313,9 @@ void ReadInput(bool& IsExit)
 		tx, ty, tz,
 		// vl, vr, vb, vt,
 		px, py, pz, cx, cy, cz, tilt, znear, zfar, hfov,
-		r,g,b,kd,ks;
+		r,g,b,kd,ks,
+		ip, x, y, z;
+	int id;
 	int n;
 	string command, comment, filename;
 	fin >> command;
@@ -306,6 +335,7 @@ void ReadInput(bool& IsExit)
 		fin >> r >> g >> b >> kd >> ks >> n;
 		readModel(filename,r,g,b,kd,ks,n);
 		cout << "Read object sucessfully!" << endl;
+		cout << "object color: " << r << " " << g << " " << " " << b << endl;
 		create_object();
 		cout << "Created ojbect!" << endl;
 		num_object++;
@@ -323,8 +353,8 @@ void ReadInput(bool& IsExit)
 		cout << px << " " << py << " " << pz << " )" << endl;
 		cout << "Center of interest: ("
 			<< cx << " " << cy << " " << cz << " )" << endl;
-		cout << "【Tilt angle�? " << tilt << endl
-			<< "【Near plane�? " << znear << "\n【Far Plane�?" << zfar << "\n【Half field of view (angle)�?" << hfov << endl;
+		// cout << "Tilt angle:" << tilt << endl
+			// << "Near plane:" << znear << "\nFar Plane" << zfar << "\nHalf field of view(angle)" << hfov << endl;
 		observer(px, py, pz, cx, cy, cz, tilt, znear, zfar, hfov);
 	}
 	else if (command == "display")
@@ -385,6 +415,14 @@ void ReadInput(bool& IsExit)
 	{
 		fin >> bgr >> bgg >> bgb;
 		cout << "Background color: " << bgr << " " << bgg << " " << bgb << endl;
+	}
+	else if(command == "light")
+	{
+		fin >> id >> ip >> x >> y >> z;
+		light[num_light] = Light(id,ip,x,y,z);
+		num_light++;
+		cout << endl << "Light [" << id << "]: intensity:" << ip << endl 
+		<<"position: (" << x << ", " << y << ", " << z << ", " << ")" << endl;   
 	}
 }
 
@@ -513,6 +551,7 @@ float delta(float a, float b)
 void readModel(string filename, float r, float g, float b, float kd, float ks, int n)
 {
 	ifstream modelin(filename);
+	cube[num_object] = ASCModel(r,g,b,kd,ks,n);
 	// get number of vertex/face first
 	modelin >> cube[num_object].num_vertex >> cube[num_object].num_face;
 
