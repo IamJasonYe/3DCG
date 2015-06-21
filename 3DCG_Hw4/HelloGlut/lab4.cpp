@@ -82,6 +82,22 @@ struct vec4
 	{
 		return sqrt(pow(data[0], 2) + pow(data[1], 2) + pow(data[2], 2));
 	}
+	vec4 operator+(const vec4& v)
+	{
+		vec4 result;
+		result.data[0] = this->data[0] + v.data[0];
+		result.data[1] = this->data[1] + v.data[1];
+		result.data[2] = this->data[2] + v.data[2];
+		return result;
+	}
+	vec4 operator-(const vec4& v)
+	{
+		vec4 result;
+		result.data[0] = this->data[0] - v.data[0];
+		result.data[1] = this->data[1] - v.data[1];
+		result.data[2] = this->data[2] - v.data[2];
+		return result;
+	}
 };
 
 struct matrix
@@ -150,6 +166,7 @@ void print_vec4(const vec4& a);
 float dot_product(const vec4& a, const vec4& b);
 vec4 cross_product(const vec4& a, const vec4& b);
 vec4 normalize(vec4 v);
+vec4 norm_vec(vec4 a, vec4 b, vec4 c);
 
 //variables decalration
 int height, width;
@@ -159,13 +176,16 @@ float zbuffer[MAX_BUFFER_SIZE][MAX_BUFFER_SIZE];
 float cbuffer[MAX_BUFFER_SIZE][MAX_BUFFER_SIZE][3];
 bool first_endpoint = true;
 float AR;
+//Eye position
+float ex,ey,ez;
 point_data* cur_point;
 matrix model_matrix;
 matrix WVM, EM, PM, GRM, eyetilt;
 ASCModel cube[MAX_NUM_OBJECT];
 Light light[MAX_NUM_LIGHT];
+vec4 view_vector;
 //Ambient light coefficient
-float Ka;
+float ka;
 //background color:R,G,B
 float bgr,bgg,bgb; 
 //Obeject
@@ -412,8 +432,8 @@ void ReadInput(bool& IsExit)
 	}
 	else if(command == "ambient")
 	{
-		fin >> Ka;
-		cout << "Ambient Ka:" << fixed << setprecision(2) << Ka << endl << endl;
+		fin >> ka;
+		cout << "Ambient ka:" << fixed << setprecision(2) << ka << endl << endl;
 	}
 	else if(command == "background")
 	{
@@ -625,6 +645,7 @@ vec4 normalize(vec4 v)
 void observer(float px, float py, float pz, float cx, float cy, float cz, float tilt, float znear, float zfar, float hfov)
 {
 	//EM
+	ex = px; ey = py; ez = pz;
 	//Translation of eye poistion: move to origin point
 	matrix Teye = matrix_translation(-px, -py, -pz);
 	printf("Eye translation matrix:\n");
@@ -709,24 +730,35 @@ void display()
 	{
 		ASCModel c = cube[i];
 		int face_num = c.num_face;
+		float r = cube[i].r,
+			  g = cube[i].g,
+			  b = cube[i].b,
+			  kd = cube[i].kd,
+			  ks = cube[i].ks;
+		int n = cube[i].n;
 		for (int j = 0; j<face_num; j++)	// For every face of the object
 		{
-			// Calculate the first point
-			int vec_num = c.face[j][1];
+			vec4 pt[4];						// World space points
+			vec4 fpt[4];					// Final points
+			int num_vec = c.face[j][0];		// number of vectors
+/*			Calculate the first point
+			int vec_num = c.face[j][1];		// the order number of the selected vector
+
 			vec4 previous(c.vertex[vec_num - 1][0],
 				c.vertex[vec_num - 1][1],
 				c.vertex[vec_num - 1][2]);
 			vec4 fp;
 			previous = mat_vec_mul(final, previous);
 			fp = previous;
-			for (int k = 2; k <= c.face[j][0]; k++)	// For the rest points of the face
+*/
+			for (int k = 1; k <= num_vec; k++)	// Calculating points of the face
 			{
-				vec_num = c.face[j][k];
-				vec4 cur(c.vertex[vec_num - 1][0],
+				int vec_num = c.face[j][k];
+				pt[k-1] = vec4(c.vertex[vec_num - 1][0],
 					c.vertex[vec_num - 1][1],
 					c.vertex[vec_num - 1][2]);
-				cur = mat_vec_mul(final, cur);
-				//Connect the line of two point(current point and previous one)
+				fpt[k-1] = mat_vec_mul(final, pt[k-1]);
+/*				Connect the line of two point(current point and previous one)
 				drawLine(previous.data[0] / previous.data[3],
 					cur.data[0] / cur.data[3],
 					previous.data[1] / previous.data[3],
@@ -742,7 +774,47 @@ void display()
 				}
 				//Update previous
 				previous = cur;
+*/
 			}
+			vec4 norm = norm_vec(pt[0],pt[1],pt[2]);	//pay attention to the order of these points.
+			float ox = pt[0].data[0],
+				  oy = pt[0].data[1],
+				  oz = pt[0].data[2];
+			float ipsum1=0,ipsum2=0;
+			for(int k=0; k<num_light; k++)
+			{
+				float lx = light[k].x,
+					  ly = light[k].y,
+					  lz = light[k].z,
+					  ip = light[k].ip;
+				vec4 l(lx-ox,ly-oy,lz-oz);	l = normalize(l);
+				vec4 v(ex-ox,ey-oy,ez-oz);	v = normalize(v);
+				float tx,ty,tz,tmp;
+				tmp = 2 * dot_product(norm,l),
+				tx = tmp * norm.data[0],
+				ty = tmp * norm.data[1],
+				tz = tmp * norm.data[2];
+				vec4 r = vec4(tx,ty,tz) - l;
+				ipsum1 += ip*dot_product(norm, l);
+				ipsum2 += ip*pow(dot_product(r,v), n);
+			}
+			float Ir = ka * r + ipsum1 * kd * r + ipsum2 * ks,
+				  Ig = ka * g + ipsum1 * kd * g + ipsum2 * ks,
+				  Ib = ka * b + ipsum1 * kd * b + ipsum2 * ks;
+
 		}
 	}
+}
+
+vec4 norm_vec(vec4 a, vec4 b, vec4 c)
+{
+	vec4 v1 = vec4(b.data[0]-a.data[0],
+				   b.data[1]-a.data[1],
+				   b.data[2]-a.data[2]);
+	vec4 v2 = vec4(c.data[0]-b.data[0],
+				   c.data[1]-b.data[1],
+				   c.data[2]-b.data[2]);
+	vec4 result = cross_product(v1,v2);
+	normalize(result);
+	return result;
 }
