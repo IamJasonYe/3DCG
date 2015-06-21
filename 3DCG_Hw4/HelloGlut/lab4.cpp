@@ -14,6 +14,8 @@
 #define  MAX_ASC_MODEL_VERTEX 1980	//Adjust following by teapot.asc
 #define  MAX_ASC_MODEL_FACE   3760	//Adjust following by teapot.asc
 #define  MAX_NUM_LIGHT 4
+#define  MAX_BUFFER_SIZE 600
+const float INF = -1;
 using namespace std;
 
 const int X_AXIS = 0,
@@ -153,6 +155,8 @@ vec4 normalize(vec4 v);
 int height, width;
 int num_object = 0;
 int num_light = 0;
+float zbuffer[MAX_BUFFER_SIZE][MAX_BUFFER_SIZE];
+float cbuffer[MAX_BUFFER_SIZE][MAX_BUFFER_SIZE][3];
 bool first_endpoint = true;
 float AR;
 point_data* cur_point;
@@ -682,7 +686,24 @@ void display()
 	//Final matrix
 	matrix final;
 	final = matrix_mul(WVM, matrix_mul(PM, EM));
+	//initial z-buffer and color-buffer
+	for(int i=0; i<MAX_BUFFER_SIZE; i++){
+		for(int j=0; j<MAX_BUFFER_SIZE; j++){
+			zbuffer[i][j] = INF;
+			cbuffer[i][j][0] = bgr;
+			cbuffer[i][j][1] = bgg;
+			cbuffer[i][j][2] = bgb;
+		}
+	}
 
+	
+	for(int i=0; i<MAX_BUFFER_SIZE; i++)
+		for(int j=0; j<MAX_BUFFER_SIZE; j++){
+			drawDot(i,j,
+				cbuffer[i][j][0],
+				cbuffer[i][j][1],
+				cbuffer[i][j][2]);
+		}
 
 	for (int i = 0; i<num_object; i++)	//For every object
 	{
