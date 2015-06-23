@@ -15,6 +15,7 @@
 #define  MAX_ASC_MODEL_FACE   3760	//Adjust following by teapot.asc
 #define  MAX_NUM_LIGHT 4
 #define  MAX_BUFFER_SIZE 600
+#define  TOL 		0.01
 const float INF = 100000000;
 using namespace std;
 
@@ -48,7 +49,6 @@ struct ASCModel
 	int   num_face;
 	float vertex[MAX_ASC_MODEL_VERTEX][3];
 	int   face[MAX_ASC_MODEL_FACE][5];
-	bool face_front[MAX_ASC_MODEL_FACE];
 	ASCModel(){}
 	ASCModel(float r_, float g_, float b_, float kd_, float ks_, int n_)
 	{
@@ -154,7 +154,6 @@ void viewport(float vl, float vr, float vb, float vt);
 void display();
 void fill_polygon(vec4 pa, vec4 pb, vec4 pc, float r, float g, float b);
 bool inside_polygon(int x,int y, float pax, float pay, float pbx, float pby, float pcx, float pcy,float area);
-double depth(int x, int y, vec4 norm,float x0, float y0, float z0);
 vec4 perspective_divide(vec4 a);
 vec4 window_mapping(vec4 a);
 
@@ -719,11 +718,9 @@ void viewport(float vl, float vr, float vb, float vt)
 
 void display()
 {
-	//Final matrix
-
-	final = matrix_mul(WVM, matrix_mul(PM, EM));
+	//Final PM matrix
 	finalPM = matrix_mul(PM, EM);
-	//initial z-buffer and color-buffer
+	//Initial z-buffer and color-buffer
 	for(int i=0; i<MAX_BUFFER_SIZE; i++){
 		for(int j=0; j<MAX_BUFFER_SIZE; j++){
 			zbuffer[i][j] = INF;
@@ -735,6 +732,7 @@ void display()
 
 	for (int i = 0; i<num_object; i++)	//For every object
 	{
+		// Get the oject basic status
 		ASCModel c = cube[i];
 		int face_num = c.num_face;
 		float  r = c.r,
@@ -743,15 +741,14 @@ void display()
 			  kd = c.kd,
 			  ks = c.ks;
 		int n = cube[i].n;
+
 		for (int j = 0; j<face_num; j++)	// For every face of the object
 		{
 			float Ir = ka * r,
 				  Ig = ka * g,
 		 		  Ib = ka * b;
 			vec4 pt[4];						// World space points
-			vec4 fpt[4];					// Final points
-			vec4 ppt[4];					// Perspective divided points
-			int num_vec = c.face[j][0];		// number of vectors
+			int num_vec = c.face[j][0];		// Number of vectors
 			for (int k = 1; k <= num_vec; k++)	// Calculating points of the face
 			{
 				int vec_num = c.face[j][k];
@@ -759,9 +756,9 @@ void display()
 							   c.vertex[vec_num - 1][1],
 							   c.vertex[vec_num - 1][2]);
 			}
-			vec4 norm = norm_vec(pt[0],pt[1],pt[2]);	//pay attention to the order of these points.
+			vec4 norm = norm_vec(pt[0],pt[1],pt[2]);	//Pay attention to the order of these points.
 			norm = normalize(norm);
-			//middle point of the object
+			//Middle point of the face
 			float ox=0,oy=0,oz=0;
 			for(int k=0; k<num_vec; k++)
 			{
@@ -772,16 +769,15 @@ void display()
 			ox /= num_vec;
 			oy /= num_vec;
 			oz /= num_vec;
-			//view vector
+			
+			//View vector
 			vec4 v(ex-ox,ey-oy,ez-oz);	v = normalize(v);
 			float VN = dot_product(v, norm);
+			//If the face is the not front side, do clipping it.
 			if(VN <=0)
-				c.face_front[j] = false;
-			else
-				c.face_front[j] = true;
-			if(!c.face_front[j])
 				continue;
-			//lighting
+			float ipsum1=0,ipsum2=0;
+			//Lighting
 			for(int k=0; k<num_light; k++)
 			{
 				//Light vector
@@ -790,16 +786,12 @@ void display()
 					  lz = light[k].z,
 					  ip = light[k].ip;
 				vec4 l(lx-ox,ly-oy,lz-oz);	l = normalize(l);
-
-				//Reflect vector
 				float NL = dot_product(norm,l);
 				if(NL >= 0)
 				{
-					Ir += kd*ip*NL*r;
-					Ig += kd*ip*NL*g;
-					Ib += kd*ip*NL*b;
+					ipsum1 += kd*ip*NL;
 				}
-				
+				//Reflect vector
 				float tx,ty,tz,tmp;
 				tmp = 2 * NL,
 				tx = tmp * norm.data[0],
@@ -811,12 +803,12 @@ void display()
 				float RV = dot_product(r,v);
 				if(RV >= 0){
 					float RVN = pow(RV,n);
-					Ir += ks*ip*RVN;
-					Ig += ks*ip*RVN;
-					Ib += ks*ip*RVN;
+					ipsum2 += ks * ip *RVN;
 				}
 			}
-
+			Ir += ipsum1*r + ipsum2;
+			Ig += ipsum1*g + ipsum2;
+			Ib += ipsum1*b + ipsum2;
 			for(int k=0; k<num_vec-2; k++)
 			{
 				
@@ -824,7 +816,7 @@ void display()
 			}
 		}
 	}
-	//find max
+	/*Find max
 	float rmax=0,gmax=0,bmax=0;
 	for(int i=0; i<MAX_BUFFER_SIZE; i++){
 		for(int j=0; j<MAX_BUFFER_SIZE; j++){
@@ -832,16 +824,8 @@ void display()
 			gmax=max(cbuffer[i][j][1],gmax);
 			bmax=max(cbuffer[i][j][2],bmax);
 		}
-	}
-	// for(int i=0; i<MAX_BUFFER_SIZE; i++){
-	// 	for(int j=0; j<MAX_BUFFER_SIZE; j++){
-	// 		if(zbuffer[i][j] == INF){
-	// 			cbuffer[i][j][0] = bgr;
-	// 			cbuffer[i][j][1] = bgg;
-	// 			cbuffer[i][j][2] = bgb;
-	// 		}
-	// 	}
-	// }
+	}*/
+
 	for(int i=0; i<MAX_BUFFER_SIZE; i++){
 		for(int j=0; j<MAX_BUFFER_SIZE; j++){
 			drawDot(i,j,
@@ -892,21 +876,14 @@ void fill_polygon(vec4 pa, vec4 pb, vec4 pc, float r, float g, float b)
 		  cy = pc.data[1],
 		  cz = pc.data[2];
 
-	vec4 v1 = vec4(bx-ax,
-				   by-ay,
-				   bz-az);
-	vec4 v2 = vec4(cx-bx,
-				   cy-by,
-				   cz-bz);
-
-	vec4 norm = cross_product(v2,v1);
+	vec4 norm = norm_vec(pa,pb,pc);
 	//Plan equation
 	float A = norm.data[0];
 	float B = norm.data[1];
 	float C = norm.data[2];
 	float D = -(A * ax + B * ay + C*az);
 
-	//find the least square window to contain the polygon
+	//Find the least square window to contain the polygon
 	float minx = MAX_BUFFER_SIZE + 1,
 		  miny = MAX_BUFFER_SIZE + 1,
 		  maxx = -1,
@@ -915,11 +892,11 @@ void fill_polygon(vec4 pa, vec4 pb, vec4 pc, float r, float g, float b)
 	maxx = max(max(ax,bx),cx);
 	miny = min(min(ay,by),cy);
 	maxy = max(max(ay,by),cy);
-	double s = area(ax, ay, bx, by, cx, cy);
+	// Update the buffer by using Z-buffer algorithm
+	double s = area(ax, ay, bx, by, cx, cy);		//the area of the triangle
 	double z;
 	for(int i=floor(miny); i<=floor(maxy); i++)
 	{
-
 		for(int j=floor(minx); j<=floor(maxx); j++)
 		{
 			if(inside_polygon(j,i,ax,ay,bx,by,cx,cy,s))			
@@ -937,21 +914,16 @@ void fill_polygon(vec4 pa, vec4 pb, vec4 pc, float r, float g, float b)
 	}
 }
 
+//Judge whether (x,y) is in the polygon(triangle).
 bool inside_polygon(int x,int y, float pax, float pay, float pbx, float pby, float pcx, float pcy, float s)
 {
 	double s1 = area(1.0*x,1.0*y,(double)pax,(double)pay,(double)pbx,(double)pby);
 	double s2 = area(1.0*x,1.0*y,(double)pax,(double)pay,(double)pcx,(double)pcy);
 	double s3 = area(1.0*x,1.0*y,(double)pbx,(double)pby,(double)pcx,(double)pcy);
-	return abs(((s1+s2+s3) - s)) < 0.01;
+	return abs(((s1+s2+s3) - s)) < TOL;
 }
 
-double depth(int x, int y, vec4 norm, float x0, float y0, float z0)
-{
-	double nx = (double)norm.data[0],
-		   ny = (double)norm.data[1],
-		   nz = (double)norm.data[2];
-	return ((1.0*x-x0)*nx+(1.0*y-y0)*ny)/(-nz)+z0; 
-}
+
 
 double area(float pax, float pay, float pbx, float pby, float pcx, float pcy)
 {
