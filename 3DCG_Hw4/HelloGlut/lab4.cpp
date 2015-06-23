@@ -158,16 +158,6 @@ double depth(int x, int y, vec4 norm,float x0, float y0, float z0);
 vec4 perspective_divide(vec4 a);
 vec4 window_mapping(vec4 a);
 
-//Draw line
-void drawDot(int x, int y, float r, float g, float b);
-void drawLine(int x0, int x1, int y0, int y1);
-void drawLine1(int x0, int x1, int y0, int y1, bool xy_interchange, bool neg);
-void drawLine2(int x0, int x1, int y0, int y1, bool xy_interchange, bool neg);
-void drawLine3(int x0, int x1, int y0, int y1, bool xy_interchange, bool neg);
-void drawLine4(int x0, int x1, int y0, int y1, bool xy_interchange, bool neg);
-void changeColor(int color);
-void drawDotBuffer(int x, int y, float r, float g, float b);
-
 //Matrix operation
 void print_matrix(const matrix& a);
 void identity_matrix(matrix& a);
@@ -723,8 +713,8 @@ void viewport(float vl, float vr, float vb, float vt)
 		1);
 	T3 = matrix_translation(vl, vb, 0);
 	WVM = matrix_mul(T3, matrix_mul(S2, T1));
-	// cout << "WVM" << endl;
-	// print_matrix(WVM);
+	cout << "WVM" << endl;
+	print_matrix(WVM);
 }
 
 void display()
@@ -737,9 +727,9 @@ void display()
 	for(int i=0; i<MAX_BUFFER_SIZE; i++){
 		for(int j=0; j<MAX_BUFFER_SIZE; j++){
 			zbuffer[i][j] = INF;
-			// cbuffer[i][j][0] = bgr;
-			// cbuffer[i][j][1] = bgg;
-			// cbuffer[i][j][2] = bgb;
+			cbuffer[i][j][0] = bgr;
+			cbuffer[i][j][1] = bgg;
+			cbuffer[i][j][2] = bgb;
 		}
 	}
 
@@ -752,15 +742,12 @@ void display()
 			   b = c.b,
 			  kd = c.kd,
 			  ks = c.ks;
-		// cout << "r:" << r << "g:" << g << "b:" << b <<endl;
-		// cout << "kd:"<<kd<< "ks:"<<ks<<endl;
 		int n = cube[i].n;
 		for (int j = 0; j<face_num; j++)	// For every face of the object
 		{
 			float Ir = ka * r,
 				  Ig = ka * g,
 		 		  Ib = ka * b;
-		// cout << "Irgb(0):" << Ir << " " << Ig << " " << Ib << endl;
 			vec4 pt[4];						// World space points
 			vec4 fpt[4];					// Final points
 			vec4 ppt[4];					// Perspective divided points
@@ -774,7 +761,6 @@ void display()
 			}
 			vec4 norm = norm_vec(pt[0],pt[1],pt[2]);	//pay attention to the order of these points.
 			norm = normalize(norm);
-			// cout <<"normal: "<<norm.data[0] << norm.data[1] << norm.data[2]<<endl;
 			//middle point of the object
 			float ox=0,oy=0,oz=0;
 			for(int k=0; k<num_vec; k++)
@@ -786,7 +772,6 @@ void display()
 			ox /= num_vec;
 			oy /= num_vec;
 			oz /= num_vec;
-			// cout << "object position:"<< ox << oy << oz << endl;
 			//view vector
 			vec4 v(ex-ox,ey-oy,ez-oz);	v = normalize(v);
 			float VN = dot_product(v, norm);
@@ -796,8 +781,6 @@ void display()
 				c.face_front[j] = true;
 			if(!c.face_front[j])
 				continue;
-			// cout << "view:";
-			// print_vec4(v);
 			//lighting
 			for(int k=0; k<num_light; k++)
 			{
@@ -807,11 +790,9 @@ void display()
 					  lz = light[k].z,
 					  ip = light[k].ip;
 				vec4 l(lx-ox,ly-oy,lz-oz);	l = normalize(l);
-				// cout << "light v:";
-				// print_vec4(l);
+
 				//Reflect vector
 				float NL = dot_product(norm,l);
-				// cout << "NL:" << NL << endl;
 				if(NL >= 0)
 				{
 					Ir += kd*ip*NL*r;
@@ -819,7 +800,6 @@ void display()
 					Ib += kd*ip*NL*b;
 				}
 				
-				// cout << "Irgb(1):" << Ir << " " << Ig << " " << Ib << endl;
 				float tx,ty,tz,tmp;
 				tmp = 2 * NL,
 				tx = tmp * norm.data[0],
@@ -828,32 +808,20 @@ void display()
 				vec4 r = vec4(tx-l.data[0],
 							  ty-l.data[1],
 							  tz-l.data[2]);
-				// cout << "reflect v:";
-				// print_vec4(r);
 				float RV = dot_product(r,v);
-					// cout << "RVN: "<<RV << endl;
 				if(RV >= 0){
 					float RVN = pow(RV,n);
 					Ir += ks*ip*RVN;
 					Ig += ks*ip*RVN;
 					Ib += ks*ip*RVN;
 				}
-				// cout << "Irgb(2):" << Ir << " " << Ig << " " << Ib << endl;
 			}
 
-			// cout << "Irgb:" << Ir << " " << Ig << " " << Ib << endl;
 			for(int k=0; k<num_vec-2; k++)
 			{
-				// cout << "Fill polygon:" << endl;
-				// cout << "point:" << endl;
-				// print_vec4(fpt[0]);
-				// print_vec4(fpt[k+1]);
-				// print_vec4(fpt[k+2]);
-				// cout << "color: " << Ir << " " << Ig << " " << Ib << endl;
+				
 				fill_polygon(pt[0],pt[k+1],pt[k+2],Ir,Ig,Ib);
 			}
-			// cout << endl;
-			// system("pause");
 		}
 	}
 	//find max
@@ -865,34 +833,17 @@ void display()
 			bmax=max(cbuffer[i][j][2],bmax);
 		}
 	}
-	// cout << "rmax: " << rmax << endl; 
-	// cout << "gmax: " << gmax << endl; 
-	// cout << "bmax: " << bmax << endl; 
-	// //normalize
 	// for(int i=0; i<MAX_BUFFER_SIZE; i++){
 	// 	for(int j=0; j<MAX_BUFFER_SIZE; j++){
-	// 		if(rmax > 1)
-	// 			cbuffer[i][j][0] /= rmax;
-	// 		if (gmax > 1){
-	// 			cbuffer[i][j][1] /= gmax;
+	// 		if(zbuffer[i][j] == INF){
+	// 			cbuffer[i][j][0] = bgr;
+	// 			cbuffer[i][j][1] = bgg;
+	// 			cbuffer[i][j][2] = bgb;
 	// 		}
-	// 		if(bmax > 1)
-	// 			cbuffer[i][j][2] /= bmax;
 	// 	}
 	// }
 	for(int i=0; i<MAX_BUFFER_SIZE; i++){
 		for(int j=0; j<MAX_BUFFER_SIZE; j++){
-			if(zbuffer[i][j] == INF){
-				cbuffer[i][j][0] = bgr;
-				cbuffer[i][j][1] = bgg;
-				cbuffer[i][j][2] = bgb;
-			}
-		}
-	}
-	for(int i=0; i<MAX_BUFFER_SIZE; i++){
-		for(int j=0; j<MAX_BUFFER_SIZE; j++){
-			// printf("%d %d %.10f %f %f %f\n", i, j, zbuffer[i][j],cbuffer[i][j][1], cbuffer[i][j][2], cbuffer[i][j][2]);
-			// cout << i <<" " << j << " " << cbuffer[i][j][0] <<" " <<  cbuffer[i][j][1] <<" " <<  cbuffer[i][j][2] << endl;
 			drawDot(i,j,
 				cbuffer[i][j][0],
 				cbuffer[i][j][1],
@@ -947,11 +898,15 @@ void fill_polygon(vec4 pa, vec4 pb, vec4 pc, float r, float g, float b)
 	vec4 v2 = vec4(cx-bx,
 				   cy-by,
 				   cz-bz);
+
 	vec4 norm = cross_product(v2,v1);
-	double A = norm.data[0];
-	double B = norm.data[1];
-	double C = norm.data[2];
-	double D = -(A * ax + B * ay + C*az);
+	//Plan equation
+	float A = norm.data[0];
+	float B = norm.data[1];
+	float C = norm.data[2];
+	float D = -(A * ax + B * ay + C*az);
+
+	//find the least square window to contain the polygon
 	float minx = MAX_BUFFER_SIZE + 1,
 		  miny = MAX_BUFFER_SIZE + 1,
 		  maxx = -1,
@@ -960,18 +915,14 @@ void fill_polygon(vec4 pa, vec4 pb, vec4 pc, float r, float g, float b)
 	maxx = max(max(ax,bx),cx);
 	miny = min(min(ay,by),cy);
 	maxy = max(max(ay,by),cy);
-	// minz = min(min(paz,pbz),pcz);
-	// maxz = max(max(paz,pbz),pcz);
 	double s = area(ax, ay, bx, by, cx, cy);
-	
 	double z;
 	for(int i=floor(miny); i<=floor(maxy); i++)
 	{
 
 		for(int j=floor(minx); j<=floor(maxx); j++)
 		{
-
-			if(inside_polygon(j,i,ax,ay,bx,by,cx,cy,s))
+			if(inside_polygon(j,i,ax,ay,bx,by,cx,cy,s))			
 			{
 				z = -(A*j+B*i+D)/C;
 				if(zbuffer[j][i] > z && z > 0)
@@ -1015,13 +966,6 @@ double area(float pax, float pay, float pbx, float pby, float pcx, float pcy)
 double length(double pax, double pay, double pbx, double pby)
 {
 	return sqrt((pax-pbx) * (pax-pbx)  + (pay-pby) * (pay-pby));
-}
-
-void drawDotBuffer(int x, int y, float r, float g, float b)
-{
-	cbuffer[x][y][0] = r;
-	cbuffer[x][y][1] = g;
-	cbuffer[x][y][2] = b;
 }
 
 vec4 perspective_divide(vec4 a)
