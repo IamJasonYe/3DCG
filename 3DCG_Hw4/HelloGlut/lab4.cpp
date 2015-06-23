@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "drawline.h"
 #include <iostream>
 #include <iomanip>
@@ -15,7 +15,7 @@
 #define  MAX_ASC_MODEL_FACE   3760	//Adjust following by teapot.asc
 #define  MAX_NUM_LIGHT 4
 #define  MAX_BUFFER_SIZE 600
-const float INF = -1;
+const float INF = 100000000;
 using namespace std;
 
 const int X_AXIS = 0,
@@ -48,6 +48,7 @@ struct ASCModel
 	int   num_face;
 	float vertex[MAX_ASC_MODEL_VERTEX][3];
 	int   face[MAX_ASC_MODEL_FACE][5];
+	bool face_front[MAX_ASC_MODEL_FACE];
 	ASCModel(){}
 	ASCModel(float r_, float g_, float b_, float kd_, float ks_, int n_)
 	{
@@ -151,6 +152,21 @@ void clearScreen();
 void observer(float px, float py, float pz, float cx, float cy, float cz, float tilt, float znear, float zfar, float hfov);
 void viewport(float vl, float vr, float vb, float vt);
 void display();
+void fill_polygon(vec4 pa, vec4 pb, vec4 pc, float r, float g, float b);
+bool inside_polygon(int x,int y, float pax, float pay, float pbx, float pby, float pcx, float pcy,float area);
+double depth(int x, int y, vec4 norm,float x0, float y0, float z0);
+vec4 perspective_divide(vec4 a);
+vec4 window_mapping(vec4 a);
+
+//Draw line
+void drawDot(int x, int y, float r, float g, float b);
+void drawLine(int x0, int x1, int y0, int y1);
+void drawLine1(int x0, int x1, int y0, int y1, bool xy_interchange, bool neg);
+void drawLine2(int x0, int x1, int y0, int y1, bool xy_interchange, bool neg);
+void drawLine3(int x0, int x1, int y0, int y1, bool xy_interchange, bool neg);
+void drawLine4(int x0, int x1, int y0, int y1, bool xy_interchange, bool neg);
+void changeColor(int color);
+void drawDotBuffer(int x, int y, float r, float g, float b);
 
 //Matrix operation
 void print_matrix(const matrix& a);
@@ -172,15 +188,17 @@ vec4 norm_vec(vec4 a, vec4 b, vec4 c);
 int height, width;
 int num_object = 0;
 int num_light = 0;
-float zbuffer[MAX_BUFFER_SIZE][MAX_BUFFER_SIZE];
+double zbuffer[MAX_BUFFER_SIZE][MAX_BUFFER_SIZE];
 float cbuffer[MAX_BUFFER_SIZE][MAX_BUFFER_SIZE][3];
 bool first_endpoint = true;
 float AR;
+ifstream fin;
 //Eye position
 float ex,ey,ez;
 point_data* cur_point;
 matrix model_matrix;
 matrix WVM, EM, PM, GRM, eyetilt;
+matrix final, finalPM;
 ASCModel cube[MAX_NUM_OBJECT];
 Light light[MAX_NUM_LIGHT];
 vec4 view_vector;
@@ -188,6 +206,7 @@ vec4 view_vector;
 float ka;
 //background color:R,G,B
 float bgr,bgg,bgb; 
+
 //Obeject
 void create_object();
 
@@ -196,7 +215,9 @@ float deg2rad(float degree);
 float ratio(float a, float b);
 float delta(float a, float b);
 void readModel(string filename, float r, float g, float b, float kd, float ks, int n);
-ifstream fin;
+double area(float pax, float pay, float pbx, float pby, float pcx, float pcy);
+double length(double pax, double pay, double pbx, double pby);
+
 
 void main(int ac, char** av)
 {
@@ -326,6 +347,7 @@ void displayFunc(void){
 		ReadInput(IsExit);
 	}
 	fin.close();
+	while(1);
 	// exit(0);
 }
 
@@ -422,7 +444,8 @@ void ReadInput(bool& IsExit)
 	{
 		IsExit = true;
 		cout << endl;
-		// exit(0);
+		system("pause");
+		exit(0);
 	}
 	else if (command == "#")
 	{
@@ -449,6 +472,7 @@ void ReadInput(bool& IsExit)
 		<<"position: (" << x << ", " << y << ", " << z << ", " << ")" << endl;   
 	}
 }
+
 
 //Matrix A multiply matrix B
 matrix matrix_mul(const matrix& a, const matrix& b)
@@ -503,8 +527,9 @@ vec4 mat_vec_mul(const matrix& A, const vec4& x)
 void print_vec4(const vec4& a)
 {
 	printf("[ ");
-	for (int i = 0; i<4; i++)
-		printf("%lf ", a.data[i]);
+	for (int i = 0; i<3; i++)
+		printf("%lf ", a.data[i] / a.data[3]);
+	printf("%lf ", a.data[3]);
 	printf("]\n");
 }
 
@@ -676,8 +701,8 @@ void observer(float px, float py, float pz, float cx, float cy, float cz, float 
 	//PM
 	identity_matrix(PM);
 	PM.data[1][1] = AR;
-	PM.data[2][2] = tan(deg2rad(hfov)) * zfar / (zfar - znear);
-	PM.data[2][3] = zfar * znear / (znear - zfar) * tan(deg2rad(hfov));
+	PM.data[2][2] = tan(deg2rad(hfov)) * (zfar / (zfar - znear));
+	PM.data[2][3] = zfar * (znear / (znear - zfar)) * tan(deg2rad(hfov));
 	PM.data[3][2] = tan(deg2rad(hfov));
 	PM.data[3][3] = 0;
 }
@@ -705,105 +730,176 @@ void viewport(float vl, float vr, float vb, float vt)
 void display()
 {
 	//Final matrix
-	matrix final;
+
 	final = matrix_mul(WVM, matrix_mul(PM, EM));
+	finalPM = matrix_mul(PM, EM);
 	//initial z-buffer and color-buffer
 	for(int i=0; i<MAX_BUFFER_SIZE; i++){
 		for(int j=0; j<MAX_BUFFER_SIZE; j++){
 			zbuffer[i][j] = INF;
-			cbuffer[i][j][0] = bgr;
-			cbuffer[i][j][1] = bgg;
-			cbuffer[i][j][2] = bgb;
+			// cbuffer[i][j][0] = bgr;
+			// cbuffer[i][j][1] = bgg;
+			// cbuffer[i][j][2] = bgb;
 		}
 	}
-
-	
-	for(int i=0; i<MAX_BUFFER_SIZE; i++)
-		for(int j=0; j<MAX_BUFFER_SIZE; j++){
-			drawDot(i,j,
-				cbuffer[i][j][0],
-				cbuffer[i][j][1],
-				cbuffer[i][j][2]);
-		}
 
 	for (int i = 0; i<num_object; i++)	//For every object
 	{
 		ASCModel c = cube[i];
 		int face_num = c.num_face;
-		float r = cube[i].r,
-			  g = cube[i].g,
-			  b = cube[i].b,
-			  kd = cube[i].kd,
-			  ks = cube[i].ks;
+		float  r = c.r,
+			   g = c.g,
+			   b = c.b,
+			  kd = c.kd,
+			  ks = c.ks;
+		// cout << "r:" << r << "g:" << g << "b:" << b <<endl;
+		// cout << "kd:"<<kd<< "ks:"<<ks<<endl;
 		int n = cube[i].n;
 		for (int j = 0; j<face_num; j++)	// For every face of the object
 		{
+			float Ir = ka * r,
+				  Ig = ka * g,
+		 		  Ib = ka * b;
+		// cout << "Irgb(0):" << Ir << " " << Ig << " " << Ib << endl;
 			vec4 pt[4];						// World space points
 			vec4 fpt[4];					// Final points
+			vec4 ppt[4];					// Perspective divided points
 			int num_vec = c.face[j][0];		// number of vectors
-/*			Calculate the first point
-			int vec_num = c.face[j][1];		// the order number of the selected vector
-
-			vec4 previous(c.vertex[vec_num - 1][0],
-				c.vertex[vec_num - 1][1],
-				c.vertex[vec_num - 1][2]);
-			vec4 fp;
-			previous = mat_vec_mul(final, previous);
-			fp = previous;
-*/
 			for (int k = 1; k <= num_vec; k++)	// Calculating points of the face
 			{
 				int vec_num = c.face[j][k];
 				pt[k-1] = vec4(c.vertex[vec_num - 1][0],
-					c.vertex[vec_num - 1][1],
-					c.vertex[vec_num - 1][2]);
-				fpt[k-1] = mat_vec_mul(final, pt[k-1]);
-/*				Connect the line of two point(current point and previous one)
-				drawLine(previous.data[0] / previous.data[3],
-					cur.data[0] / cur.data[3],
-					previous.data[1] / previous.data[3],
-					cur.data[1] / cur.data[3]);
-				//If it's last one, connect back to the first point
-				if (k == c.face[j][0])
-				{
-					previous = fp;
-					drawLine(previous.data[0] / previous.data[3],
-						cur.data[0] / cur.data[3],
-						previous.data[1] / previous.data[3],
-						cur.data[1] / cur.data[3]);
-				}
-				//Update previous
-				previous = cur;
-*/
+							   c.vertex[vec_num - 1][1],
+							   c.vertex[vec_num - 1][2]);
 			}
 			vec4 norm = norm_vec(pt[0],pt[1],pt[2]);	//pay attention to the order of these points.
-			float ox = pt[0].data[0],
-				  oy = pt[0].data[1],
-				  oz = pt[0].data[2];
-			float ipsum1=0,ipsum2=0;
+			norm = normalize(norm);
+			// cout <<"normal: "<<norm.data[0] << norm.data[1] << norm.data[2]<<endl;
+			//middle point of the object
+			float ox=0,oy=0,oz=0;
+			for(int k=0; k<num_vec; k++)
+			{
+				ox += pt[k].data[0];
+				oy += pt[k].data[1];
+				oz += pt[k].data[2];
+			}
+			ox /= num_vec;
+			oy /= num_vec;
+			oz /= num_vec;
+			// cout << "object position:"<< ox << oy << oz << endl;
+			//view vector
+			vec4 v(ex-ox,ey-oy,ez-oz);	v = normalize(v);
+			float VN = dot_product(v, norm);
+			if(VN <=0)
+				c.face_front[j] = false;
+			else
+				c.face_front[j] = true;
+			if(!c.face_front[j])
+				continue;
+			// cout << "view:";
+			// print_vec4(v);
+			//lighting
 			for(int k=0; k<num_light; k++)
 			{
+				//Light vector
 				float lx = light[k].x,
 					  ly = light[k].y,
 					  lz = light[k].z,
 					  ip = light[k].ip;
 				vec4 l(lx-ox,ly-oy,lz-oz);	l = normalize(l);
-				vec4 v(ex-ox,ey-oy,ez-oz);	v = normalize(v);
+				// cout << "light v:";
+				// print_vec4(l);
+				//Reflect vector
+				float NL = dot_product(norm,l);
+				// cout << "NL:" << NL << endl;
+				if(NL >= 0)
+				{
+					Ir += kd*ip*NL*r;
+					Ig += kd*ip*NL*g;
+					Ib += kd*ip*NL*b;
+				}
+				
+				// cout << "Irgb(1):" << Ir << " " << Ig << " " << Ib << endl;
 				float tx,ty,tz,tmp;
-				tmp = 2 * dot_product(norm,l),
+				tmp = 2 * NL,
 				tx = tmp * norm.data[0],
 				ty = tmp * norm.data[1],
 				tz = tmp * norm.data[2];
-				vec4 r = vec4(tx,ty,tz) - l;
-				ipsum1 += ip*dot_product(norm, l);
-				ipsum2 += ip*pow(dot_product(r,v), n);
+				vec4 r = vec4(tx-l.data[0],
+							  ty-l.data[1],
+							  tz-l.data[2]);
+				// cout << "reflect v:";
+				// print_vec4(r);
+				float RV = dot_product(r,v);
+					// cout << "RVN: "<<RV << endl;
+				if(RV >= 0){
+					float RVN = pow(RV,n);
+					Ir += ks*ip*RVN;
+					Ig += ks*ip*RVN;
+					Ib += ks*ip*RVN;
+				}
+				// cout << "Irgb(2):" << Ir << " " << Ig << " " << Ib << endl;
 			}
-			float Ir = ka * r + ipsum1 * kd * r + ipsum2 * ks,
-				  Ig = ka * g + ipsum1 * kd * g + ipsum2 * ks,
-				  Ib = ka * b + ipsum1 * kd * b + ipsum2 * ks;
 
+			// cout << "Irgb:" << Ir << " " << Ig << " " << Ib << endl;
+			for(int k=0; k<num_vec-2; k++)
+			{
+				// cout << "Fill polygon:" << endl;
+				// cout << "point:" << endl;
+				// print_vec4(fpt[0]);
+				// print_vec4(fpt[k+1]);
+				// print_vec4(fpt[k+2]);
+				// cout << "color: " << Ir << " " << Ig << " " << Ib << endl;
+				fill_polygon(pt[0],pt[k+1],pt[k+2],Ir,Ig,Ib);
+			}
+			// cout << endl;
+			// system("pause");
 		}
 	}
+	//find max
+	float rmax=0,gmax=0,bmax=0;
+	for(int i=0; i<MAX_BUFFER_SIZE; i++){
+		for(int j=0; j<MAX_BUFFER_SIZE; j++){
+			rmax=max(cbuffer[i][j][0],rmax);
+			gmax=max(cbuffer[i][j][1],gmax);
+			bmax=max(cbuffer[i][j][2],bmax);
+		}
+	}
+	// cout << "rmax: " << rmax << endl; 
+	// cout << "gmax: " << gmax << endl; 
+	// cout << "bmax: " << bmax << endl; 
+	// //normalize
+	// for(int i=0; i<MAX_BUFFER_SIZE; i++){
+	// 	for(int j=0; j<MAX_BUFFER_SIZE; j++){
+	// 		if(rmax > 1)
+	// 			cbuffer[i][j][0] /= rmax;
+	// 		if (gmax > 1){
+	// 			cbuffer[i][j][1] /= gmax;
+	// 		}
+	// 		if(bmax > 1)
+	// 			cbuffer[i][j][2] /= bmax;
+	// 	}
+	// }
+	for(int i=0; i<MAX_BUFFER_SIZE; i++){
+		for(int j=0; j<MAX_BUFFER_SIZE; j++){
+			if(zbuffer[i][j] == INF){
+				cbuffer[i][j][0] = bgr;
+				cbuffer[i][j][1] = bgg;
+				cbuffer[i][j][2] = bgb;
+			}
+		}
+	}
+	for(int i=0; i<MAX_BUFFER_SIZE; i++){
+		for(int j=0; j<MAX_BUFFER_SIZE; j++){
+			// printf("%d %d %.10f %f %f %f\n", i, j, zbuffer[i][j],cbuffer[i][j][1], cbuffer[i][j][2], cbuffer[i][j][2]);
+			// cout << i <<" " << j << " " << cbuffer[i][j][0] <<" " <<  cbuffer[i][j][1] <<" " <<  cbuffer[i][j][2] << endl;
+			drawDot(i,j,
+				cbuffer[i][j][0],
+				cbuffer[i][j][1],
+				cbuffer[i][j][2]);
+		}
+	}
+
 }
 
 vec4 norm_vec(vec4 a, vec4 b, vec4 c)
@@ -814,7 +910,135 @@ vec4 norm_vec(vec4 a, vec4 b, vec4 c)
 	vec4 v2 = vec4(c.data[0]-b.data[0],
 				   c.data[1]-b.data[1],
 				   c.data[2]-b.data[2]);
-	vec4 result = cross_product(v1,v2);
-	normalize(result);
+	vec4 result = cross_product(v2,v1);
+	result = normalize(result);
 	return result;
+}
+
+void fill_polygon(vec4 pa, vec4 pb, vec4 pc, float r, float g, float b)
+{
+	//PM
+	pa = mat_vec_mul(finalPM, pa);
+	pb = mat_vec_mul(finalPM, pb);
+	pc = mat_vec_mul(finalPM, pc);
+	//Perspective divided
+	pa = perspective_divide(pa);
+	pb = perspective_divide(pb);
+	pc = perspective_divide(pc);
+
+	//Window mapping
+	pa = window_mapping(pa);
+	pb = window_mapping(pb);
+	pc = window_mapping(pc);
+
+	float ax = pa.data[0],
+		  ay = pa.data[1],
+		  az = pa.data[2],
+		  bx = pb.data[0],
+		  by = pb.data[1],
+		  bz = pb.data[2],
+		  cx = pc.data[0],
+		  cy = pc.data[1],
+		  cz = pc.data[2];
+
+	vec4 v1 = vec4(bx-ax,
+				   by-ay,
+				   bz-az);
+	vec4 v2 = vec4(cx-bx,
+				   cy-by,
+				   cz-bz);
+	vec4 norm = cross_product(v2,v1);
+	double A = norm.data[0];
+	double B = norm.data[1];
+	double C = norm.data[2];
+	double D = -(A * ax + B * ay + C*az);
+	float minx = MAX_BUFFER_SIZE + 1,
+		  miny = MAX_BUFFER_SIZE + 1,
+		  maxx = -1,
+		  maxy = -1;
+	minx = min(min(ax,bx),cx);
+	maxx = max(max(ax,bx),cx);
+	miny = min(min(ay,by),cy);
+	maxy = max(max(ay,by),cy);
+	// minz = min(min(paz,pbz),pcz);
+	// maxz = max(max(paz,pbz),pcz);
+	double s = area(ax, ay, bx, by, cx, cy);
+	
+	double z;
+	for(int i=floor(miny); i<=floor(maxy); i++)
+	{
+
+		for(int j=floor(minx); j<=floor(maxx); j++)
+		{
+
+			if(inside_polygon(j,i,ax,ay,bx,by,cx,cy,s))
+			{
+				z = -(A*j+B*i+D)/C;
+				if(zbuffer[j][i] > z && z > 0)
+				{
+					zbuffer[j][i] = z;
+					cbuffer[j][i][0] = r;
+					cbuffer[j][i][1] = g;
+					cbuffer[j][i][2] = b;
+				}
+			}
+		}
+	}
+}
+
+bool inside_polygon(int x,int y, float pax, float pay, float pbx, float pby, float pcx, float pcy, float s)
+{
+	double s1 = area(1.0*x,1.0*y,(double)pax,(double)pay,(double)pbx,(double)pby);
+	double s2 = area(1.0*x,1.0*y,(double)pax,(double)pay,(double)pcx,(double)pcy);
+	double s3 = area(1.0*x,1.0*y,(double)pbx,(double)pby,(double)pcx,(double)pcy);
+	return abs(((s1+s2+s3) - s)) < 0.01;
+}
+
+double depth(int x, int y, vec4 norm, float x0, float y0, float z0)
+{
+	double nx = (double)norm.data[0],
+		   ny = (double)norm.data[1],
+		   nz = (double)norm.data[2];
+	return ((1.0*x-x0)*nx+(1.0*y-y0)*ny)/(-nz)+z0; 
+}
+
+double area(float pax, float pay, float pbx, float pby, float pcx, float pcy)
+{
+	//Helen formula
+	double a = length((double)pax, (double)pay, (double)pbx, (double)pby),
+		   b = length((double)pax, (double)pay, (double)pcx, (double)pcy),
+		   c = length((double)pbx, (double)pby, (double)pcx, (double)pcy);
+	double p = (a+b+c)/2;
+	return sqrt(p*(p-a)*(p-b)*(p-c));
+}
+
+double length(double pax, double pay, double pbx, double pby)
+{
+	return sqrt((pax-pbx) * (pax-pbx)  + (pay-pby) * (pay-pby));
+}
+
+void drawDotBuffer(int x, int y, float r, float g, float b)
+{
+	cbuffer[x][y][0] = r;
+	cbuffer[x][y][1] = g;
+	cbuffer[x][y][2] = b;
+}
+
+vec4 perspective_divide(vec4 a)
+{
+	a.data[0] /= a.data[3];
+	a.data[1] /= a.data[3];
+	a.data[2] /= a.data[3];
+	return a;
+}
+
+vec4 window_mapping(vec4 a)
+{
+	a.data[0] = a.data[0] * WVM.data[0][0]
+			  + a.data[1] * WVM.data[0][1]
+			  + WVM.data[0][3];
+	a.data[1] = a.data[0] * WVM.data[1][0]
+			  + a.data[1] * WVM.data[1][1]
+			  + WVM.data[1][3];
+	return a;
 }
